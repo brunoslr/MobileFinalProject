@@ -3,12 +3,13 @@ var camera, scene, renderer;
 			var controls;
 
 			var objects = [];
-
+			
+			var inputManager = new InputManager();
 			var raycaster;
 
 			var blocker = document.getElementById( 'blocker' );
 			var instructions = document.getElementById( 'instructions' );
-
+			
 			// http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 
 			var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -21,7 +22,8 @@ var camera, scene, renderer;
 
 					if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
 
-						controlsEnabled = true;
+						inputManager.controlsEnabled = true;
+						console.log(inputManager.controlsEnabled);
 						controls.enabled = true;
 
 						blocker.style.display = 'none';
@@ -100,12 +102,7 @@ var camera, scene, renderer;
 			init();
 			animate();
 
-			var controlsEnabled = false;
-
-			var moveForward = false;
-			var moveBackward = false;
-			var moveLeft = false;
-			var moveRight = false;
+			
 
 			var prevTime = performance.now();
 			var velocity = new THREE.Vector3();
@@ -124,68 +121,7 @@ var camera, scene, renderer;
 				controls = new THREE.PointerLockControls( camera );
 				scene.add( controls.getObject() );
 
-				var onKeyDown = function ( event ) {
-
-					switch ( event.keyCode ) {
-
-						case 38: // up
-						case 87: // w
-							moveForward = true;
-							break;
-
-						case 37: // left
-						case 65: // a
-							moveLeft = true; break;
-
-						case 40: // down
-						case 83: // s
-							moveBackward = true;
-							break;
-
-						case 39: // right
-						case 68: // d
-							moveRight = true;
-							break;
-
-						case 32: // space
-							if ( canJump === true ) velocity.y += 350;
-							canJump = false;
-							break;
-
-					}
-
-				};
-
-				var onKeyUp = function ( event ) {
-
-					switch( event.keyCode ) {
-
-						case 38: // up
-						case 87: // w
-							moveForward = false;
-							break;
-
-						case 37: // left
-						case 65: // a
-							moveLeft = false;
-							break;
-
-						case 40: // down
-						case 83: // s
-							moveBackward = false;
-							break;
-
-						case 39: // right
-						case 68: // d
-							moveRight = false;
-							break;
-
-					}
-
-				};
-
-				document.addEventListener( 'keydown', onKeyDown, false );
-				document.addEventListener( 'keyup', onKeyUp, false );
+				
 
 				raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
@@ -246,16 +182,12 @@ var camera, scene, renderer;
 
 				}
 
-				//
-
 				renderer = new THREE.WebGLRenderer();
 				renderer.setClearColor( 0xffffff );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
-
-				//
-
+				
 				window.addEventListener( 'resize', onWindowResize, false );
 
 			}
@@ -270,10 +202,10 @@ var camera, scene, renderer;
 			}
 
 			function animate() {
-
+				
 				requestAnimationFrame( animate );
 
-				if ( controlsEnabled ) {
+				if ( inputManager.controlsEnabled ) {
 					raycaster.ray.origin.copy( controls.getObject().position );
 					raycaster.ray.origin.y -= 10;
 
@@ -288,17 +220,21 @@ var camera, scene, renderer;
 					velocity.z -= velocity.z * 10.0 * delta;
 
 					velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+					if(inputManager.moveJump){
+						velocity.y+=350;
+						inputManager.moveJump=false;
+					}
+					
+					if ( inputManager.moveForward ) velocity.z -= 400.0 * delta;
+					if ( inputManager.moveBackward ) velocity.z += 400.0 * delta;
 
-					if ( moveForward ) velocity.z -= 400.0 * delta;
-					if ( moveBackward ) velocity.z += 400.0 * delta;
-
-					if ( moveLeft ) velocity.x -= 400.0 * delta;
-					if ( moveRight ) velocity.x += 400.0 * delta;
+					if ( inputManager.moveLeft ) velocity.x -= 400.0 * delta;
+					if ( inputManager.moveRight ) velocity.x += 400.0 * delta;
 
 					if ( isOnObject === true ) {
 						velocity.y = Math.max( 0, velocity.y );
 
-						canJump = true;
+						inputManager.canJump = true;
 					}
 
 					controls.getObject().translateX( velocity.x * delta );
@@ -310,7 +246,7 @@ var camera, scene, renderer;
 						velocity.y = 0;
 						controls.getObject().position.y = 10;
 
-						canJump = true;
+						inputManager.canJump = true;
 
 					}
 
