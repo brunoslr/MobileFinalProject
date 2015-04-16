@@ -6,6 +6,7 @@ var camera, scene, renderer;
 			
 			var inputManager = new InputManager();
 			var worldManager = new WorldManager();
+			var networkManager = new NetworkManager();
 			var raycaster;
 
 			var blocker = document.getElementById( 'blocker' );
@@ -24,7 +25,6 @@ var camera, scene, renderer;
 					if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
 
 						inputManager.controlsEnabled = true;
-						console.log(inputManager.controlsEnabled);
 						controls.enabled = true;
 
 						blocker.style.display = 'none';
@@ -121,8 +121,6 @@ var camera, scene, renderer;
 
 				controls = new THREE.PointerLockControls( camera );
 				scene.add( controls.getObject() );
-
-				
 
 				raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
