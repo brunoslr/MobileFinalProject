@@ -81,7 +81,8 @@ this.onload = function () {
     }
     initCannon();
     init();
-    animate();
+    update();
+    draw();
 
     var prevTime = performance.now();
     var velocity = new THREE.Vector3();
@@ -107,6 +108,9 @@ this.onload = function () {
 
         controls = new THREE.PointerLockControls(camera);
         scene.add(controls.getObject());
+        playerRigidbody = new CANNON.RigidbBody(5, 1);
+        playerRigidbody.position = controls.getObject().position;
+        world.add(playerRigidbody);
 
         raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 
@@ -174,6 +178,13 @@ this.onload = function () {
 
         window.addEventListener('resize', onWindowResize, false);
 
+        skyMaterial = new THREE.MeshShaderMaterial({
+            fragmentShader: shader.fragmentShader,
+            vertexShader: shader.vertexShader,
+            uniforms: uniforms
+        });
+        //skyboxMesh = new THREE.Mesh(new THREE.CubeGeometry(100000, 100000, 100000, 1, 1, 1, null, true), skyMaterial);
+        //scene.add(skyboxMesh);
     }
 
 
@@ -229,25 +240,9 @@ this.onload = function () {
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    function animate() {
 
-        requestAnimationFrame(animate);
-
+    function handleInput(delta) {
         if (inputManager.controlsEnabled) {
-            raycaster.ray.origin.copy(controls.getObject().position);
-            raycaster.ray.origin.y -= 10;
-
-            var intersections = raycaster.intersectObjects(objects);
-
-            var isOnObject = intersections.length > 0;
-
-            var time = performance.now();
-            var delta = (time - prevTime) / 1000;
-
-            world.step(1/6);
-            velocity.x -= velocity.x * 10.0 * delta;
-            velocity.z -= velocity.z * 10.0 * delta;
-
             velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
             if (inputManager.moveJump) {
                 velocity.y += 350;
@@ -275,22 +270,48 @@ this.onload = function () {
                 inputManager.canJump = true;
             }
 
-            for (var i = 0; i < balls.length; i++) {
-                ballMeshes[i].position.copy(balls[i].position);
-                ballMeshes[i].quaternion.copy(balls[i].quaternion);
-            }
+            velocity.x -= velocity.x * 10.0 * delta;
+            velocity.z -= velocity.z * 10.0 * delta;
+        }
+    }
+    function update() {
+        raycaster.ray.origin.copy(controls.getObject().position);
+        raycaster.ray.origin.y -= 10;
 
-            for (var i = 0; i < objects.length; i++) {
-                objects[i].position = physicsObjects[i].position;
-                objects[i].quaternion = physicsObjects[i].quaternion;
-                console.log(objects[i].position);
-            }
+        var intersections = raycaster.intersectObjects(objects);
 
-            prevTime = time;
+        var isOnObject = intersections.length > 0;
+
+        var time = performance.now();
+        var delta = (time - prevTime) / 1000;
+
+        //Inputs here
+        handleInput(delta);
+
+
+        //Then physics
+        world.step(1 / 6);
+
+        controls.getObject().position = playerRigidbody.position;
+        controls.getObject().quaternion = playerRigidbody.quaternion;
+
+        //copy from physics step to the game objects            
+        for (var i = 0; i < balls.length; i++) {
+            ballMeshes[i].position.copy(balls[i].position);
+            ballMeshes[i].quaternion.copy(balls[i].quaternion);
         }
 
-        renderer.render(scene, camera);
+        for (var i = 0; i < objects.length; i++) {
+            objects[i].position = physicsObjects[i].position;
+            objects[i].quaternion = physicsObjects[i].quaternion;
+        }
 
+        prevTime = time;
+    }
+
+    function draw() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
     }
 
 
