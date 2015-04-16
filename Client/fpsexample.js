@@ -290,7 +290,7 @@ this.onload = function () {
 
     function draw() {
         update();
-        requestAnimationFrame(draw);        
+        requestAnimationFrame(draw);
         renderer.render(scene, camera);
     }
 
