@@ -3,6 +3,7 @@ var camera, scene, renderer;
 			var controls;
 
 			var objects = [];
+			var enemies= [];
 			
 			var inputManager = new InputManager();
 			var worldManager = new WorldManager();
@@ -129,6 +130,10 @@ var camera, scene, renderer;
 
 				// objects
 				worldManager.addBoxes();
+				
+				//enemies
+				//adding red cubes as enemies
+				worldManager.addEnemies();
 
 				renderer = new THREE.WebGLRenderer();
 				renderer.setClearColor( 0xffffff );
@@ -201,6 +206,9 @@ var camera, scene, renderer;
 					prevTime = time;
 
 				}
+				
+				//make enemies move
+				worldManager.moveEnemies();
 
 				renderer.render( scene, camera );
 
