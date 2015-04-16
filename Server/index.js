@@ -13,14 +13,14 @@ wss.on('connection', function connection(ws) {
 	console.log("TOTALMESSAGE");
 	console.log(message);
 	console.log("ENDTOTALMESSAGE");
-	var splitArray= message.split("\n");
+	/*var splitArray= message.split("\n");
 	switch(parseInt(splitArray[0])){
 		case 1:
 		wsArray.push(new WebConnection(ws,splitArray[1]));
 		break;
 		default:
 		break;
-	}
+	}*/
   });
   console.log("connected");
   

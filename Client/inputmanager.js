@@ -14,7 +14,6 @@ function InputManager(){
 
 
 InputManager.prototype.handleEvent= function(e){
-	console.log(e.type);
 	if(e.type=="keydown"){
 		this.onKeyDown(event);
 	}
