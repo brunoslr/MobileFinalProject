@@ -81,7 +81,8 @@ this.onload = function () {
     }
     initCannon();
     init();
-    animate();
+    update();
+    draw();
 
     var prevTime = performance.now();
     var velocity = new THREE.Vector3();
@@ -229,10 +230,7 @@ this.onload = function () {
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    function animate() {
-
-        requestAnimationFrame(animate);
-
+    function update() {
         if (inputManager.controlsEnabled) {
             raycaster.ray.origin.copy(controls.getObject().position);
             raycaster.ray.origin.y -= 10;
@@ -244,7 +242,7 @@ this.onload = function () {
             var time = performance.now();
             var delta = (time - prevTime) / 1000;
 
-            world.step(1/6);
+            world.step(1 / 6);
             velocity.x -= velocity.x * 10.0 * delta;
             velocity.z -= velocity.z * 10.0 * delta;
 
@@ -288,16 +286,19 @@ this.onload = function () {
 
             prevTime = time;
         }
+    }
 
+    function draw() {
+        update();
+        requestAnimationFrame(draw);        
         renderer.render(scene, camera);
-
     }
 
 
     var ballShape = new CANNON.Sphere(2);
     var ballMaterial = new THREE.MeshPhongMaterial({
         wireframe: true,
-
+        color: 0xff0000
     });
     var ballGeometry = new THREE.SphereGeometry(ballShape.radius, 32, 32);
     var shootDirection = new THREE.Vector3();

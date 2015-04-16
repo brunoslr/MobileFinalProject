@@ -7,6 +7,7 @@ function InputManager(){
 	this.moveRight = false;
 	this.moveJump = false;
 	this.canJump = false;
+	this.isSprinting = false;
 	this.controlsEnabled= false;
 	window.addEventListener( 'keydown', this, false );
 	window.addEventListener( 'keyup', this, false );
@@ -49,6 +50,10 @@ InputManager.prototype.onKeyDown= function(event){
 			if ( this.canJump == true ) this.moveJump=true;
 			this.canJump = false;
 			break;
+
+	    case 16: // shift
+	        this.isSprinting = true;
+	        break;
 	}
 };
 InputManager.prototype.onKeyUp= function(event){
@@ -73,6 +78,10 @@ InputManager.prototype.onKeyUp= function(event){
 		case 68: // d
 			this.moveRight = false;
 			break;
+
+	    case 16: // shift
+	        this.isSprinting = false;
+	        break;
 	}
 };
 
