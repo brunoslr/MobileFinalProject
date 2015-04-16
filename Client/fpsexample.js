@@ -7,7 +7,7 @@ this.onload = function () {
     var controls;
     var playerRigidbody;
 
-    //Cannnon needs the following
+    //Cannon needs the following
     var world, physicsMaterial, physicsObjects = [], sphereBody, sphereShape;
 
     var objects = [];
@@ -170,8 +170,33 @@ this.onload = function () {
 
 		//enemies
 		//adding red cubes as enemies
-		worldManager.addEnemies();
+		//worldManager.addEnemies();
 
+	var geometry = new THREE.BoxGeometry( 10, 20, 10 );
+	for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
+
+		var face = geometry.faces[ i ];
+		face.vertexColors[ 0 ] = new THREE.Color( 1,0,0 );
+		face.vertexColors[ 1 ] = new THREE.Color( 1,0,0);
+		face.vertexColors[ 2 ] = new THREE.Color( 1,0,0 );
+
+	}
+
+	for ( var i = 0; i < 20; i ++ ) {
+
+		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
+
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
+		// mesh.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
+		mesh.position.y=10;
+		mesh.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
+		scene.add( mesh );
+
+		material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+
+		enemies.push( mesh );
+	}
 		
         renderer = new THREE.WebGLRenderer();
         renderer.setClearColor(0xffffff);
@@ -204,7 +229,7 @@ this.onload = function () {
             world.solver = solver;
         }
 
-        world.gravity.set(0, -20, 0);
+        world.gravity.set(0, 0, 0);
         world.broadphase = new CANNON.NaiveBroadphase();
 
         physicsMaterial = new CANNON.Material("slipperyMaterial");
@@ -282,21 +307,54 @@ this.onload = function () {
             for (var i = 0; i < balls.length; i++) {
                 ballMeshes[i].position.copy(balls[i].position);
                 ballMeshes[i].quaternion.copy(balls[i].quaternion);
+				
+				checkEnemyCollision(ballMeshes[i]);
+				
+				if(ballMeshes[i].position.distanceTo(controls.getObject().position) > 1000 || ballMeshes[i].position.y<=1.5) //balls[i].radius)
+					{
+						scene.remove(ballMeshes[i]);
+						scene.remove(balls[i]);
+						ballMeshes.splice(i,1);
+						balls.splice(i,1);
+						console.log("Bullets:"+balls.length);
+					}
+					
+		
             }
 
             for (var i = 0; i < objects.length; i++) {
                 objects[i].position = physicsObjects[i].position;
                 objects[i].quaternion = physicsObjects[i].quaternion;
-                console.log(objects[i].position);
             }
 
             prevTime = time;
 			
-			//make enemies move
-            worldManager.moveEnemies();
+			//ENEMIES
+			//make enemies move also in worldManager.moveEnemies();
+			for(var i=0;i<enemies.length;i++)
+			{
+				if(enemies[i].position.distanceTo(controls.getObject().position) < 100)
+				{
+					enemies[i].translateOnAxis(enemies[i].worldToLocal(new THREE.Vector3(controls.getObject().position.x,controls.getObject().position.y,controls.getObject().position.z)),.008);
+				}
+			
+			}		
+		
         }
     }
 
+	function checkEnemyCollision(v)
+	{
+		for(var i=0;i<enemies.length;i++)
+			{
+			if(enemies[i].position.distanceTo(v.position) < 10)
+			{
+				scene.remove(enemies[i]);
+				enemies.splice(i,1);
+			}
+		}
+	}
+		
     function draw() {
         update();
         requestAnimationFrame(draw);
@@ -309,19 +367,21 @@ this.onload = function () {
         wireframe: true,
         color: 0xff0000
     });
-    var ballGeometry = new THREE.SphereGeometry(ballShape.radius, 32, 32);
+    var ballGeometry = new THREE.SphereGeometry(ballShape.radius, 8, 6);
     var shootDirection = new THREE.Vector3();
     var projector = new THREE.Projector();
     var balls = [];
     var ballMeshes = [];
-    function getShootDir(targetVec) {
+    
+	function getShootDir(targetVec) {
         var vector = targetVec;
         targetVec.set(0, 0, 1);
         projector.unprojectVector(vector, camera);
         var ray = new THREE.Ray(sphereBody.position, vector.sub(sphereBody.position).normalize());
         targetVec.copy(ray.direction);
     }
-    window.addEventListener("click", function (e) {
+    
+	window.addEventListener("click", function (e) {
         //if (controls.enabled == true) 
         {
             var x = controls.getObject().position.x;
