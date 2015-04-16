@@ -1,11 +1,11 @@
 var debugBuild = true;
-
+var shootVelo = 55;
 
 this.onload = function () {
     var camera, scene, renderer;
     var geometry, material, mesh;
     var controls;
-
+    var playerRigidbody;
 
     //Cannnon needs the following
     var world, physicsMaterial, physicsObjects = [], sphereBody, sphereShape;
@@ -23,13 +23,9 @@ this.onload = function () {
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
     if (havePointerLock) {
-
         var element = document.body;
-
         var pointerlockchange = function (event) {
-
             if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
-
                 inputManager.controlsEnabled = true;
                 console.log(inputManager.controlsEnabled);
                 controls.enabled = true;
@@ -42,7 +38,6 @@ this.onload = function () {
                 blocker.style.display = 'box';
                 instructions.style.display = '';
             }
-
         }
 
         var pointerlockerror = function (event) {
@@ -59,57 +54,39 @@ this.onload = function () {
         document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
 
         instructions.addEventListener('click', function (event) {
-
             instructions.style.display = 'none';
-
             // Ask the browser to lock the pointer
             element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 
             if (/Firefox/i.test(navigator.userAgent)) {
-
                 var fullscreenchange = function (event) {
-
                     if (document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element) {
-
                         document.removeEventListener('fullscreenchange', fullscreenchange);
                         document.removeEventListener('mozfullscreenchange', fullscreenchange);
-
                         element.requestPointerLock();
                     }
-
                 }
-
                 document.addEventListener('fullscreenchange', fullscreenchange, false);
                 document.addEventListener('mozfullscreenchange', fullscreenchange, false);
-
                 element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
-
                 element.requestFullscreen();
-
             } else {
-
                 element.requestPointerLock();
-
             }
 
         }, false);
 
     } else {
-
         //instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
-
     }
     initCannon();
     init();
     animate();
 
-
-
     var prevTime = performance.now();
     var velocity = new THREE.Vector3();
 
     function init() {
-
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
 
         scene = new THREE.Scene();
@@ -132,8 +109,6 @@ this.onload = function () {
         scene.add(controls.getObject());
 
         raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
-
-        // floor
 
         geometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
         geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
@@ -249,12 +224,9 @@ this.onload = function () {
 
 
     function onWindowResize() {
-
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-
         renderer.setSize(window.innerWidth, window.innerHeight);
-
     }
 
     function animate() {
@@ -290,7 +262,6 @@ this.onload = function () {
 
             if (isOnObject === true) {
                 velocity.y = Math.max(0, velocity.y);
-
                 inputManager.canJump = true;
             }
 
@@ -308,6 +279,13 @@ this.onload = function () {
                 ballMeshes[i].position.copy(balls[i].position);
                 ballMeshes[i].quaternion.copy(balls[i].quaternion);
             }
+
+            for (var i = 0; i < objects.length; i++) {
+                objects[i].position = physicsObjects[i].position;
+                objects[i].quaternion = physicsObjects[i].quaternion;
+                console.log(objects[i].position);
+            }
+
             prevTime = time;
         }
 
@@ -323,7 +301,6 @@ this.onload = function () {
     });
     var ballGeometry = new THREE.SphereGeometry(ballShape.radius, 32, 32);
     var shootDirection = new THREE.Vector3();
-    var shootVelo = 100;
     var projector = new THREE.Projector();
     var balls = [];
     var ballMeshes = [];
@@ -337,9 +314,9 @@ this.onload = function () {
     window.addEventListener("click", function (e) {
         //if (controls.enabled == true) 
         {
-            var x = sphereBody.position.x;
-            var y = sphereBody.position.y;
-            var z = sphereBody.position.z;
+            var x = controls.getObject().position.x;
+            var y = controls.getObject().position.y;
+            var z = controls.getObject().position.z;
             var ballBody = new CANNON.Body({ mass: 1 });
             ballBody.addShape(ballShape);
             var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
