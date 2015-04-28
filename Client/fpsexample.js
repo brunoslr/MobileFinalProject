@@ -14,6 +14,7 @@ this.onload = function () {
     var enemies= [];
 
     var inputManager = new InputManager();
+	var networkManager;
     var raycaster;
 
     var blocker = document.getElementById('blocker');
@@ -109,6 +110,7 @@ this.onload = function () {
 
         controls = new THREE.PointerLockControls(camera);
         scene.add(controls.getObject());
+		networkManager = new NetworkManager();
 
         raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 
@@ -263,6 +265,8 @@ this.onload = function () {
 
     function update() {
         if (inputManager.controlsEnabled) {
+			
+			networkManager.update(controls);
             raycaster.ray.origin.copy(controls.getObject().position);
             raycaster.ray.origin.y -= 10;
 
