@@ -9,8 +9,10 @@ this.onload = function () {
     var enemies= [];
 
     var inputManager = new InputManager();
+
     var enemyManager = new EnemyManager();
     var worldManager = new WorldManager();
+    var networkManager;
     var raycaster;
 
 
@@ -104,8 +106,10 @@ this.onload = function () {
         worldManager.addLight(scene);
 
         controls = new THREE.PointerLockControls(camera);
+
         player = controls.getObject();;
         scene.add(player);
+	networkManager = new NetworkManager();
 
         raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 
@@ -138,7 +142,8 @@ this.onload = function () {
     {
         if (inputManager.controlsEnabled)
         {
-            raycaster.ray.origin.copy(player.position);
+	    networkManager.update(controls);
+            raycaster.ray.origin.copy(player.position);	
             raycaster.ray.origin.y -= 10;
 
             var intersections = raycaster.intersectObjects(objects);
