@@ -44,7 +44,8 @@ EnemyManager.prototype.initEnemies=function(scene,enemies)
 
     }
 
-    for (var i = 0; i < 200; i++)
+    //for (var i = 0; i < 200; i++)
+    for (var i = 0; i < 1; i++)
     {
 
         var material = new THREE.MeshPhongMaterial({
