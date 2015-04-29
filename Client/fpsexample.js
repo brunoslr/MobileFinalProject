@@ -1,5 +1,7 @@
 var debugBuild = true;
 this.onload = function () {
+	var score = 0;
+	
     var camera, scene, renderer;
     var geometry;
     var controls;
@@ -7,6 +9,7 @@ this.onload = function () {
     var shootVelo =8.5;
     var objects = [];
     var enemies= [];
+	var health = 100;
 
     var inputManager = new InputManager();
 
@@ -28,6 +31,7 @@ this.onload = function () {
 
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
+	var healthbar = document.getElementById('progress-bar');
 
     // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 
@@ -142,7 +146,10 @@ this.onload = function () {
     {
         if (inputManager.controlsEnabled)
         {
-	    networkManager.update(controls);
+			
+			healthbar.value = healthbar.value - 1;
+			
+			networkManager.update(controls);
             raycaster.ray.origin.copy(player.position);	
             raycaster.ray.origin.y -= 10;
 
@@ -188,6 +195,7 @@ this.onload = function () {
             bulletsHandle();
 
             enemyManager.moveEnemies(enemies, player);
+			
         }
     }
 
@@ -195,15 +203,17 @@ this.onload = function () {
     {
         for (var i = 0; i < balls1.length; i++) {
 
-            enemyManager.checkEnemyCollision(enemies, balls1[i], scene);
+            enemyManager.checkEnemyCollision(enemies, balls1[i], scene, score);
 
-            if (balls1[i].position.distanceTo(player.position) > 1000 || balls1[i].position.y <= 1.5) //balls[i].radius)
+            if (balls1[i].position.distanceTo(player.position) > 100 || balls1[i].position.y <= 1.5) //balls[i].radius)
             {
                 scene.remove(balls1[i]);
                 balls1.splice(i, 1);
                 fVectors.splice(i,1);
             }
         }
+		score = enemies.length;
+		//ctx.fillText('Score: ' + score, canvas.width - 140, 30);
     }
 
     function draw() {
