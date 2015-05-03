@@ -3,8 +3,8 @@ this.onload = function () {
     var camera, scene, renderer;
     var geometry;
     var controls;
-    var player;
-    var shootVelo =8.5;
+    var player, player2;
+    var shootVelo = 8.5;
     var objects = [];
     var enemies= [];
 
@@ -109,6 +109,8 @@ this.onload = function () {
 
         player = controls.getObject();;
         scene.add(player);
+        player2 = controls.getObject();;
+        scene.add(player2);
 		networkManager = new NetworkManager();
 
         //raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
@@ -145,85 +147,37 @@ this.onload = function () {
         {
 			networkManager.update(controls);
             
-			/*
-			// check down hits
-			raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
-			raycaster.ray.origin.copy(player.position);	
-            raycaster.ray.origin.y -= 10;
-            var intersections = raycaster.intersectObjects(objects);
-            var isOnObject = intersections.length > 0;
+			collisionDetectionAndMovement();
 			
-			// check up up
-			raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0, 10);
-			raycaster.ray.origin.copy(player.position);	
-            raycaster.ray.origin.y += 10;
-            intersections = raycaster.intersectObjects(objects);
-            var isUnderObject = intersections.length > 0;
+            if (player.position.y < 10) {
+                velocity.y = 0;
+                player.position.y = 10;
+                inputManager.canJump = true;
+            }
 			
-			// check forward hits
-			raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(1, 0, 0), 0, 10);
-			raycaster.ray.origin.copy(player.position);	
-            raycaster.ray.origin.x += 10;
-            intersections = raycaster.intersectObjects(objects);
-            var isFrontObject = intersections.length > 0;
 			
-			// check behind hits
-			raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(-1, 0, 0), 0, 10);
-			raycaster.ray.origin.copy(player.position);	
-            raycaster.ray.origin.x -= 10;
-            intersections = raycaster.intersectObjects(objects);
-            var isBackObject = intersections.length > 0;
-			
-			// check left hits
-			raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, 1), 0, 10);
-			raycaster.ray.origin.copy(player.position);	
-            raycaster.ray.origin.z -= 10;
-            intersections = raycaster.intersectObjects(objects);
-            var isLeftObject = intersections.length > 0;
-			
-			// check right hits
-			raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 10);
-			raycaster.ray.origin.copy(player.position);	
-            raycaster.ray.origin.z -= 10;
-            intersections = raycaster.intersectObjects(objects);
-            var isRightObject = intersections.length > 0;
-			*/
-			
-			var vector = new THREE.Vector3();
-			projector.unprojectVector(vector, camera);
-			var raycaster = new THREE.Raycaster(player.position, vector.sub(player.position).normalize());
-			raycaster.intersectObjects(objects);
-            var intersections = raycaster.intersectObjects(objects);
-			var isColliding = false;
-			for(var i = 0; i < intersections.length; i++)
-			{
-				//console.log(intersections[i].distance);
-					if(intersections[i].distance <= 10)
-						isColliding = true;
-			}
-			//if(intersections.length > 0)
-			//	isColliding = true;
-			
-			/*
-			    var intersections = raycaster.intersectObjects(objects);
-			var isColliding = false;
-			for(var i = 0; i < intersections.length; i++)
-			{
-				console.log(i);
-					if(intersections[i].distance <= 5)
-						isColliding = true;
-			}
-			
-			//if(intersections.length > 0)
-			//	isColliding = true;
-			*/
 
+            moveProjectiles();
+            bulletsHandle();
+
+            enemyManager.moveEnemies(enemies, player);
+        }
+    }
+	
+	function collisionDetectionAndMovement()
+	{
+		
+			// https://github.com/mrdoob/three.js/issues/1606
+			// http://stackoverflow.com/questions/15696963/three-js-set-and-read-camera-look-vector
+			
+			
+			
             var time = performance.now();
             var delta = (time - prevTime) / 1000;
-
+			//console.log(velocity.x);
             velocity.x -= velocity.x * 10.0 * delta;
             velocity.z -= velocity.z * 10.0 * delta;
-
+			//console.log(velocity.x);
             velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
             if (inputManager.moveJump) {
                 velocity.y += 350;
@@ -235,93 +189,91 @@ this.onload = function () {
 
             if (inputManager.moveLeft) velocity.x -= 400.0 * delta;
             if (inputManager.moveRight) velocity.x += 400.0 * delta;
-
-			/*
-            if (isOnObject === true) {
-                velocity.y = Math.max(0, velocity.y);
-                inputManager.canJump = true;
-            }
-			if(isUnderObject === true)
-			{
-                velocity.y = 0;
-				console.log("under");
-			}
-			if(isFrontObject === true)
-			{
-				console.log("FRONT");
-			}
-			if(isBackObject === true)
-			{
-				console.log("Back");
-			}
-			if(isRightObject === true)
-			{
-				console.log("Right");
-			}
-			if(isLeftObject === true)
-			{
-				console.log("left");
-			}
-			*/
 			
+			
+			player.translateX(velocity.x * delta);
+			player.translateY(velocity.y * delta);
+			player.translateZ(velocity.z * delta);
+			
+			var matrix = new THREE.Matrix4();
+			matrix.extractRotation( player2.matrix );
+
+			var direction = new THREE.Vector3( 0, 0, -1 );
+			direction = matrix.multiplyVector3( direction );
+			//direction = matrix.applyMatrix4(direction);
+			
+			var raycaster = new THREE.Raycaster(player2.position, direction);
+			raycaster.intersectObjects(objects);
+            var intersections = raycaster.intersectObjects(objects);
+			var isColliding = false;
+			for(var i = 0; i < intersections.length; i++)
+			{
+				//console.log(intersections[i].distance);
+				if(intersections[i].distance <= 2 )
+				{
+					//player.translateX(-velocity.x * delta);
+					//player.translateY(velocity.y * delta);
+					//player.translateZ(-velocity.z * delta);
+					isColliding = true;
+					//player.translateX(-velocity.x * delta);
+					//player.translateY(velocity.y * delta);
+					//player.translateZ(-velocity.z * delta);
+				}
+			}
+			
+			
+			var matrix2 = new THREE.Matrix4();
+			matrix2.extractRotation( player2.matrix );
+
+			var direction2 = new THREE.Vector3( 0, 0, 1 );
+			direction2 = matrix2.multiplyVector3( direction2 );
+			//direction2 = matrix2.applyMatrix4(direction2);
+			
+			var raycaster2 = new THREE.Raycaster(player2.position, direction2);
+			raycaster2.intersectObjects(objects);
+            var intersections2 = raycaster2.intersectObjects(objects);
+			//isColliding = false;
+			for(var i = 0; i < intersections2.length; i++)
+			{
+				//console.log(intersections[i].distance);
+				if(intersections2[i].distance <= 2 )
+				{
+					//player.translateX(-velocity.x * delta);
+					//player.translateY(velocity.y * delta);
+					//player.translateZ(-velocity.z * delta);
+					isColliding = true;
+					//player.translateX(-velocity.x * delta);
+					//player.translateY(velocity.y * delta);
+					//player.translateZ(-velocity.z * delta);
+				}
+			}
+			
+			//console.log(isColliding);
+			//console.log(velocity);
+			//console.log(delta);
 			if(isColliding == true)
 			{
-				player.translateX(velocity.x * delta * -1);
+				player.translateX(-velocity.x * delta);
 				player.translateY(velocity.y * delta);
-				player.translateZ(velocity.z * delta * -1);
+				player.translateZ(-velocity.z * delta);
 				//player.translateX(velocity.x + .2 * delta * -1);
 				//player.translateY(velocity.y* delta);
 				//player.translateZ(velocity.z + .2 * delta * -1);
 			}
 			else
 			{
-				player.translateX(velocity.x * delta);
-				player.translateY(velocity.y * delta);
-				player.translateZ(velocity.z * delta);
+				//player.translateX(velocity.x * delta);
+				//player.translateY(velocity.y * delta);
+				//player.translateZ(velocity.z * delta);
 			}
 			
 
             //player.translateX(velocity.x * delta);
             //player.translateY(velocity.y * delta);
             //player.translateZ(velocity.z * delta);
-			
-			
-            if (player.position.y < 10) {
-                velocity.y = 0;
-                player.position.y = 10;
-                inputManager.canJump = true;
-            }
-			
-			
-			
-			// Zach's collision detection
-			/*
-			var tempPerson = player.clone();
-			var originPoint = tempPerson.position.clone();
-			for (var vertexIndex = 0; vertexIndex < tempPerson.geometry.vertices.length; vertexIndex++)
-			{		
-				var localVertex = tempPerson.geometry.vertices[vertexIndex].clone();
-				var globalVertex = localVertex.applyMatrix4( tempPerson.matrix );
-				var directionVector = globalVertex.sub( tempPerson.position );
-				
-				var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-				var collisionResults = ray.intersectObjects( this.collidableMeshList );
-				
-				if ( collisionResults.length > 0 && collisionResults[0].distance < 2 ) 
-				{
-					
-				}
-			}
-			*/
-			///////////////////////////////////////////////////////////////////
-
             prevTime = time;
-            moveProjectiles();
-            bulletsHandle();
-
-            enemyManager.moveEnemies(enemies, player);
-        }
-    }
+			
+	}
 
     function bulletsHandle()
     {
