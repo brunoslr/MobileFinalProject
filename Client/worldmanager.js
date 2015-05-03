@@ -66,7 +66,7 @@ WorldManager.prototype.addEnemies=function()
 
 	}
 
-	for ( var i = 0; i < 10; i ++ ) {
+	for ( var i = 0; i < 0; i ++ ) {
 
 		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
 

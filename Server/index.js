@@ -23,9 +23,9 @@ wss.on('connection', function connection(ws) {
 		case "position update":
 			for(var i= 0; i<wsArray.length; i++){
 				if(wsArray[i].ID==splitArray[1]){
-					wsArray.x= parseInt(splitArray[2]);
-					wsArray.y= parseInt(splitArray[3]);
-					wsArray.z= parseInt(splitArray[4]);
+					wsArray[i].position.x= parseInt(splitArray[2]);
+					wsArray[i].position.y= parseInt(splitArray[3]);
+					wsArray[i].position.z= parseInt(splitArray[4]);
 				}
 			}
 		break;
@@ -40,13 +40,23 @@ wss.on('connection', function connection(ws) {
 var timer= setInterval(function() { 
 	var positionUpdate = "position update\n";
 	for(var i=0; i<wsArray.length; i++){
-		positionUpdate.concat(wsArray[i].ID + "\n");
-		positionUpdate.concat(wsArray[i].position.x + "\n");
-		positionUpdate.concat(wsArray[i].position.y + "\n");
-		positionUpdate.concat(wsArray[i].position.z + "\n");
+		positionUpdate= positionUpdate + (wsArray[i].ID + "\n");
+		positionUpdate= positionUpdate + (wsArray[i].position.x + "\n");
+		positionUpdate= positionUpdate + (wsArray[i].position.y + "\n");
+		positionUpdate= positionUpdate + (wsArray[i].position.z + "\n");
 	}
 	for(var i=0; i<wsArray.length; i++){
-		wsArray[i].connection.send(positionUpdate);
+		if(wsArray[i].connection!=null){//send an update if the connection is still valid
+		try{
+			wsArray[i].connection.send(positionUpdate);
+		}
+		catch(err){
+			console.log(err);
+			wsArray.splice(i,1);
+		}
+		}else{//remove the element if not valid
+		wsArray.splice(i,1);
+		}
 	}
 },1000/30);
 

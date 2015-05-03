@@ -1,8 +1,6 @@
 var debugBuild = true;
 var shootVelo = 55;
-
-this.onload = function () {
-    var camera, scene, renderer;
+ var camera, scene, renderer;
     var geometry, material, mesh;
     var controls;
     var playerRigidbody;
@@ -19,6 +17,7 @@ this.onload = function () {
 
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
+this.onload = function () {
 
     // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 
@@ -29,7 +28,6 @@ this.onload = function () {
         var pointerlockchange = function (event) {
             if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
                 inputManager.controlsEnabled = true;
-                console.log(inputManager.controlsEnabled);
                 controls.enabled = true;
                 blocker.style.display = 'none';
 
@@ -184,7 +182,7 @@ this.onload = function () {
 
 	}
 
-	for ( var i = 0; i < 20; i ++ ) {
+	for ( var i = 0; i < 0; i ++ ) {
 
 		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
 
