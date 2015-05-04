@@ -248,6 +248,60 @@ this.onload = function () {
 				}
 			}
 			
+			
+			var matrix3 = new THREE.Matrix4();
+			matrix3.extractRotation( player2.matrix );
+
+			var direction3 = new THREE.Vector3( 1, 0, 0 );
+			direction3 = matrix3.multiplyVector3( direction3 );
+			//direction2 = matrix2.applyMatrix4(direction2);
+			
+			var raycaster3 = new THREE.Raycaster(player2.position, direction3);
+			raycaster3.intersectObjects(objects);
+            var intersections3 = raycaster3.intersectObjects(objects);
+			//isColliding = false;
+			for(var i = 0; i < intersections3.length; i++)
+			{
+				//console.log(intersections[i].distance);
+				if(intersections3[i].distance <= 2 )
+				{
+					//player.translateX(-velocity.x * delta);
+					//player.translateY(velocity.y * delta);
+					//player.translateZ(-velocity.z * delta);
+					isColliding = true;
+					//player.translateX(-velocity.x * delta);
+					//player.translateY(velocity.y * delta);
+					//player.translateZ(-velocity.z * delta);
+				}
+			}
+			
+			
+			var matrix4 = new THREE.Matrix4();
+			matrix4.extractRotation( player2.matrix );
+
+			var direction4 = new THREE.Vector3( -1, 0, 0 );
+			direction4 = matrix3.multiplyVector3( direction4 );
+			//direction2 = matrix2.applyMatrix4(direction2);
+			
+			var raycaster4 = new THREE.Raycaster(player2.position, direction4);
+			raycaster4.intersectObjects(objects);
+            var intersections4 = raycaster4.intersectObjects(objects);
+			//isColliding = false;
+			for(var i = 0; i < intersections4.length; i++)
+			{
+				//console.log(intersections[i].distance);
+				if(intersections4[i].distance <= 2 )
+				{
+					//player.translateX(-velocity.x * delta);
+					//player.translateY(velocity.y * delta);
+					//player.translateZ(-velocity.z * delta);
+					isColliding = true;
+					//player.translateX(-velocity.x * delta);
+					//player.translateY(velocity.y * delta);
+					//player.translateZ(-velocity.z * delta);
+				}
+			}
+			
 			//console.log(isColliding);
 			//console.log(velocity);
 			//console.log(delta);
