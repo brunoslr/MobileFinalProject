@@ -11,6 +11,9 @@ this.onload = function () {
     var enemies= [];
 	var health = 100;
 
+    //3d model loading
+    var loader;
+
     var inputManager = new InputManager();
 
     var enemyManager = new EnemyManager();
@@ -109,22 +112,24 @@ this.onload = function () {
 
         worldManager.addLight(scene);
 
+        loader= new THREE.JSONLoader();
+
         controls = new THREE.PointerLockControls(camera);
 
         player = controls.getObject();;
         scene.add(player);
-	networkManager = new NetworkManager();
+	    networkManager = new NetworkManager();
 
         raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
-
+        loader = new THREE.JSONLoader();
         //init floor
         worldManager.initFloor(scene);
 
         // objects
-        worldManager.addBoxes(scene, objects);
+        //worldManager.addBoxes(scene, objects);
 
 		//enemies
-        enemyManager.initEnemies(scene, enemies );
+        enemyManager.initEnemies(scene, enemies, loader);
 
         //renderer
         renderer = new THREE.WebGLRenderer();
@@ -133,8 +138,11 @@ this.onload = function () {
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        window.addEventListener('resize', onWindowResize, false);
+        window.addEventListener('resize', onWindowResize, false);  
     }
+
+
+
 
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -205,7 +213,7 @@ this.onload = function () {
 
             enemyManager.checkEnemyCollision(enemies, balls1[i], scene, score);
 
-            if (balls1[i].position.distanceTo(player.position) > 100 || balls1[i].position.y <= 1.5) //balls[i].radius)
+            if (balls1[i].position.distanceTo(player.position) > 10000 || balls1[i].position.y <= 1.5) //balls[i].radius)
             {
                 scene.remove(balls1[i]);
                 balls1.splice(i, 1);
