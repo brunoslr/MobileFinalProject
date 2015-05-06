@@ -1,8 +1,9 @@
 var debugBuild = true;
 this.onload = function () {
 	var score = 0;
-	
-    var camera, scene, renderer;
+
+var shootVelo = 55;
+ var camera, scene, renderer;
     var geometry;
     var controls;
     var player, player2;
@@ -34,6 +35,7 @@ this.onload = function () {
 
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
+this.onload = function () {
 	var healthbar = document.getElementById('progress-bar');
 
     // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
@@ -134,7 +136,32 @@ this.onload = function () {
 		//enemies
         enemyManager.initEnemies(scene, enemies, loader);
 
-        //renderer
+	var geometry = new THREE.BoxGeometry( 10, 20, 10 );
+	for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
+
+		var face = geometry.faces[ i ];
+		face.vertexColors[ 0 ] = new THREE.Color( 1,0,0 );
+		face.vertexColors[ 1 ] = new THREE.Color( 1,0,0);
+		face.vertexColors[ 2 ] = new THREE.Color( 1,0,0 );
+
+	}
+
+	for ( var i = 0; i < 0; i ++ ) {
+
+		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
+
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
+		// mesh.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
+		mesh.position.y=10;
+		mesh.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
+		scene.add( mesh );
+
+		material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+
+		enemies.push( mesh );
+	}
+		
         renderer = new THREE.WebGLRenderer();
         renderer.setClearColor(0xffffff);
         renderer.setPixelRatio(window.devicePixelRatio);
