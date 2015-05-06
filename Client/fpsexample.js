@@ -1,26 +1,43 @@
 var debugBuild = true;
-var shootVelo = 55;
-var totalEnemies = 10;
-
-
 this.onload = function () {
+	var score = 0;
+	
     var camera, scene, renderer;
-    var geometry, material, mesh;
+    var geometry;
     var controls;
-    var playerRigidbody;
-
-    //Cannon needs the following
-    var world, physicsMaterial, physicsObjects = [], sphereBody, sphereShape;
-
+    var player;
+    var shootVelo =8.5;
     var objects = [];
     var enemies= [];
+	var health = 100;
+
+    //3d model loading
+    var loader;
 
     var inputManager = new InputManager();
-	var networkManager;
+
+    var enemyManager = new EnemyManager();
+    var worldManager = new WorldManager();
+    var networkManager;
     var raycaster;
+
+
+    var geometry = new THREE.SphereGeometry( 2, 8,6 );
+    var ballMaterial = new THREE.MeshPhongMaterial({
+        wireframe: true,
+        color: 0xff0000
+    });
+
+    var projector = new THREE.Projector();
+    var balls1 = [];
+    var fVectors = [];
 
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
+	var healthbar = document.getElementById('progress-bar');
+
+    // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
+
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
     if (havePointerLock) {
@@ -31,8 +48,8 @@ this.onload = function () {
                 controls.enabled = true;
                 blocker.style.display = 'none';
 
-            } else {
-                //controls.enabled = false;
+            }
+            else {
                 blocker.style.display = '-webkit-box';
                 blocker.style.display = '-moz-box';
                 blocker.style.display = 'box';
@@ -79,180 +96,53 @@ this.onload = function () {
     } else {
         //instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
     }
-    initCannon();
     init();
     update();
     draw();
 
-
     var prevTime = performance.now();
     var velocity = new THREE.Vector3();
 
-    function init() {
+    function init()
+    {
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
 
         scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0xffffff, 0, 750);
 
-        var light = new THREE.AmbientLight(0xeeeeff);
-        light.position.set(0.5, 1, 0.75);
-        light.castShadow = true;
-        light.shadowCameraNear = 20;
-        light.shadowCameraFar = 50;//camera.far;
-        light.shadowCameraFov = 40;
-        light.shadowMapBias = 0.1;
-        light.shadowMapDarkness = 0.7;
-        light.shadowMapWidth = 2 * 512;
-        light.shadowMapHeight = 2 * 512;
+        worldManager.addLight(scene);
 
-        scene.add(light);
+        loader= new THREE.JSONLoader();
 
         controls = new THREE.PointerLockControls(camera);
-        scene.add(controls.getObject());
-		networkManager = new NetworkManager();
+
+        player = controls.getObject();;
+        scene.add(player);
+	    networkManager = new NetworkManager();
 
         raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
-
-        geometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
-        geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-
-        for (var i = 0, l = geometry.vertices.length; i < l; i++) {
-            var vertex = geometry.vertices[i];
-            vertex.x += Math.random() * 20 - 10;
-            vertex.y += Math.random() * 2;
-            vertex.z += Math.random() * 20 - 10;
-        }
-
-        for (var i = 0, l = geometry.faces.length; i < l; i++) {
-            var face = geometry.faces[i];
-            face.vertexColors[0] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-            face.vertexColors[1] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-            face.vertexColors[2] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-        }
-
-        material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
-
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.receiveShadow = true;
-        mesh.castShadow = true;
-        scene.add(mesh);
+        loader = new THREE.JSONLoader();
+        //init floor
+        worldManager.initFloor(scene);
 
         // objects
-
-        geometry = new THREE.BoxGeometry(20, 20, 20);
-
-        for (var i = 0, l = geometry.faces.length; i < l; i++) {
-
-            var face = geometry.faces[i];
-            face.vertexColors[0] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-            face.vertexColors[1] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-            face.vertexColors[2] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-
-        }
-
-
-        var halfExtents = new CANNON.Vec3(1, 1, 1);
-        var boxShape = new CANNON.Box(halfExtents);
-        for (var i = 0; i < 50; i++) {
-            // TODO: Change material, for performance
-            material = new THREE.MeshPhongMaterial({ specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors });
-            var mesh = new THREE.Mesh(geometry, material);
-            mesh.position.x = Math.floor(Math.random() * 20 - 10) * 20;
-            mesh.position.y = Math.floor(Math.random() * 20) * 20 + 10;
-            mesh.position.z = Math.floor(Math.random() * 20 - 10) * 20;
-            scene.add(mesh);
-            material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-            objects.push(mesh);
-            var boxBody = new CANNON.Body({ mass: 5 });
-            boxBody.addShape(boxShape);
-            world.add(boxBody);
-            physicsObjects.push(boxBody);
-        }
+        //worldManager.addBoxes(scene, objects);
 
 		//enemies
-		//adding red cubes as enemies
-		//worldManager.addEnemies();
+        enemyManager.initEnemies(scene, enemies, loader);
 
-	var geometry = new THREE.BoxGeometry( 10, 20, 10 );
-	for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
-
-		var face = geometry.faces[ i ];
-		face.vertexColors[ 0 ] = new THREE.Color( 1,0,0 );
-		face.vertexColors[ 1 ] = new THREE.Color( 1,0,0);
-		face.vertexColors[ 2 ] = new THREE.Color( 1,0,0 );
-
-	}
-
-	for ( var i = 0; i < 20; i ++ ) {
-
-		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
-
-		var mesh = new THREE.Mesh( geometry, material );
-		mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-		// mesh.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
-		mesh.position.y=10;
-		mesh.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
-		scene.add( mesh );
-
-		material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-
-		enemies.push( mesh );
-	}
-		
+        //renderer
         renderer = new THREE.WebGLRenderer();
         renderer.setClearColor(0xffffff);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        window.addEventListener('resize', onWindowResize, false);
-
+        window.addEventListener('resize', onWindowResize, false);  
     }
 
-    function initCannon() {
-        world = new CANNON.World();
-        world.quatNormalizeSkip = 0;
-        world.quatNormalizeFast = false;
 
-        var solver = new CANNON.GSSolver();
-        world.defaultContactMaterial.contactEquationStiffness = 1e9;
-        world.defaultContactMaterial.contactEquationRelaxation = 4;
 
-        solver.iteration = 5;
-        solver.tolerance = 0.1;
-        var split = true;
-
-        if (split) {
-            world.solver = new CANNON.SplitSolver(solver);
-        }
-        else {
-            world.solver = solver;
-        }
-
-        world.gravity.set(0, 0, 0);
-        world.broadphase = new CANNON.NaiveBroadphase();
-
-        physicsMaterial = new CANNON.Material("slipperyMaterial");
-        var physicsContactMaterial = new CANNON.ContactMaterial(physicsMaterial,
-                                                                physicsMaterial,
-                                                                0.0,
-                                                                0.3);
-        world.addContactMaterial(physicsContactMaterial);
-
-        var mass = 5, radius = 1.3;
-        sphereShape = new CANNON.Sphere(radius);
-        sphereBody = new CANNON.Body({ mass: mass });
-        sphereBody.addShape(sphereShape);
-        sphereBody.position.set(0, 5, 0);
-        sphereBody.linearDamping = 0.9;
-        world.add(sphereBody);
-        // Create a plane
-        var groundShape = new CANNON.Plane();
-        var groundBody = new CANNON.Body({ mass: 0 });
-        groundBody.addShape(groundShape);
-        groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-        world.add(groundBody);
-    }
 
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -260,11 +150,15 @@ this.onload = function () {
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    function update() {
-        if (inputManager.controlsEnabled) {
+    function update()
+    {
+        if (inputManager.controlsEnabled)
+        {
+			
+			healthbar.value = healthbar.value - 1;
 			
 			networkManager.update(controls);
-            raycaster.ray.origin.copy(controls.getObject().position);
+            raycaster.ray.origin.copy(player.position);	
             raycaster.ray.origin.y -= 10;
 
             var intersections = raycaster.intersectObjects(objects);
@@ -274,7 +168,6 @@ this.onload = function () {
             var time = performance.now();
             var delta = (time - prevTime) / 1000;
 
-            world.step(1 / 6);
             velocity.x -= velocity.x * 10.0 * delta;
             velocity.z -= velocity.z * 10.0 * delta;
 
@@ -295,116 +188,76 @@ this.onload = function () {
                 inputManager.canJump = true;
             }
 
-            controls.getObject().translateX(velocity.x * delta);
-            controls.getObject().translateY(velocity.y * delta);
-            controls.getObject().translateZ(velocity.z * delta);
+            player.translateX(velocity.x * delta);
+            player.translateY(velocity.y * delta);
+            player.translateZ(velocity.z * delta);
 
-            if (controls.getObject().position.y < 10) {
+            if (player.position.y < 10) {
                 velocity.y = 0;
-                controls.getObject().position.y = 10;
+                player.position.y = 10;
                 inputManager.canJump = true;
             }
 
-            for (var i = 0; i < balls.length; i++) {
-                ballMeshes[i].position.copy(balls[i].position);
-                ballMeshes[i].quaternion.copy(balls[i].quaternion);
-				
-				checkEnemyCollision(ballMeshes[i]);
-				
-				if(ballMeshes[i].position.distanceTo(controls.getObject().position) > 1000 || ballMeshes[i].position.y<=1.5) //balls[i].radius)
-					{
-						scene.remove(ballMeshes[i]);
-						scene.remove(balls[i]);
-						ballMeshes.splice(i,1);
-						balls.splice(i,1);
-					}
-					
-		
-            }
-
-            for (var i = 0; i < objects.length; i++) {
-                objects[i].position = physicsObjects[i].position;
-                objects[i].quaternion = physicsObjects[i].quaternion;
-            }
-
             prevTime = time;
+            moveProjectiles();
+            bulletsHandle();
+
+            enemyManager.moveEnemies(enemies, player);
 			
-			//ENEMIES
-			//make enemies move also in worldManager.moveEnemies();
-			for(var i=0;i<enemies.length;i++)
-			{
-				if(enemies[i].position.distanceTo(controls.getObject().position) < 100)
-				{
-					enemies[i].translateOnAxis(enemies[i].worldToLocal(new THREE.Vector3(controls.getObject().position.x,controls.getObject().position.y,controls.getObject().position.z)),.008);
-				}
-			
-			}		
-		
         }
     }
 
-	function checkEnemyCollision(v)
-	{
-		for(var i=0;i<enemies.length;i++)
-			{
-			if(enemies[i].position.distanceTo(v.position) < 10)
-			{
-				scene.remove(enemies[i]);
-				enemies.splice(i,1);
-			}
-		}
-	}
-		
+    function bulletsHandle()
+    {
+        for (var i = 0; i < balls1.length; i++) {
+
+            enemyManager.checkEnemyCollision(enemies, balls1[i], scene, score);
+
+            if (balls1[i].position.distanceTo(player.position) > 10000 || balls1[i].position.y <= 1.5) //balls[i].radius)
+            {
+                scene.remove(balls1[i]);
+                balls1.splice(i, 1);
+                fVectors.splice(i,1);
+            }
+        }
+		score = enemies.length;
+		//ctx.fillText('Score: ' + score, canvas.width - 140, 30);
+    }
+
     function draw() {
         update();
         requestAnimationFrame(draw);
         renderer.render(scene, camera);
     }
-
-    var ballShape = new CANNON.Sphere(2);
-    var ballMaterial = new THREE.MeshPhongMaterial({
-        wireframe: true,
-        color: 0xff0000
-    });
-    var ballGeometry = new THREE.SphereGeometry(ballShape.radius, 8, 6);
-    var shootDirection = new THREE.Vector3();
-    var projector = new THREE.Projector();
-    var balls = [];
-    var ballMeshes = [];
     
 	function getShootDir(targetVec) {
         var vector = targetVec;
         targetVec.set(0, 0, 1);
         projector.unprojectVector(vector, camera);
-        var ray = new THREE.Ray(sphereBody.position, vector.sub(sphereBody.position).normalize());
+        var ray = new THREE.Ray(player.position, vector.sub(player.position).normalize());
         targetVec.copy(ray.direction);
     }
 
-	window.addEventListener("click", function (e) {
-        //if (controls.enabled == true) 
-        {
-            var x = controls.getObject().position.x;
-            var y = controls.getObject().position.y;
-            var z = controls.getObject().position.z;
-            var ballBody = new CANNON.Body({ mass: 1 });
-            ballBody.addShape(ballShape);
-            var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
-            world.add(ballBody);
-            scene.add(ballMesh);
-            ballMesh.castShadow = true;
-            ballMesh.receiveShadow = true;
-            balls.push(ballBody);
-            ballMeshes.push(ballMesh);
-            getShootDir(shootDirection);
-            ballBody.velocity.set(shootDirection.x * shootVelo,
-                                    shootDirection.y * shootVelo,
-                                    shootDirection.z * shootVelo);
-            // Move the ball outside the player sphere
-            x += shootDirection.x * (sphereShape.radius * 1.02 + ballShape.radius);
-            y += shootDirection.y * (sphereShape.radius * 1.02 + ballShape.radius);
-            z += shootDirection.z * (sphereShape.radius * 1.02 + ballShape.radius);
-            ballBody.position.set(x, y, z);
-            ballMesh.position.set(x, y, z);
+    function drawSphere(position)
+    {
+        var sphere = new THREE.Mesh( geometry, ballMaterial );
+        var shootDirection = new THREE.Vector3();
+        sphere.position.set(position.x, position.y, position.z);
+        balls1.push(sphere);
+        getShootDir(shootDirection);
+        fVectors.push(shootDirection);
+        scene.add( sphere );
+    }
+
+    function moveProjectiles()
+    {
+        for(var i=0; i<balls1.length; i++) {
+            balls1[i].position.set(balls1[i].position.x + fVectors[i].x * shootVelo,
+                balls1[i].position.y + fVectors[i].y * shootVelo,
+                balls1[i].position.z + fVectors[i].z * shootVelo);
         }
+    }
+	window.addEventListener("click", function (e) {
+            drawSphere(player.position);
     });
 }

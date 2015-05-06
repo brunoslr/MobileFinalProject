@@ -2,60 +2,8 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>three.js - pointerlock controls</title>
-		<style>
-			html, body {
-				width: 100%;
-				height: 100%;
-			}
-
-			body {
-				background-color: #ffffff;
-				margin: 0;
-				overflow: hidden;
-				font-family: arial;
-			}
-
-			#blocker {
-
-				position: absolute;
-
-				width: 100%;
-				height: 100%;
-
-				background-color: rgba(0,0,0,0.5);
-
-			}
-
-			#instructions {
-
-				width: 100%;
-				height: 100%;
-
-				display: -webkit-box;
-				display: -moz-box;
-				display: box;
-
-				-webkit-box-orient: horizontal;
-				-moz-box-orient: horizontal;
-				box-orient: horizontal;
-
-				-webkit-box-pack: center;
-				-moz-box-pack: center;
-				box-pack: center;
-
-				-webkit-box-align: center;
-				-moz-box-align: center;
-				box-align: center;
-
-				color: #ffffff;
-				text-align: center;
-
-				cursor: pointer;
-
-			}
-
-		</style>
+		<title>Three.JS FPS</title>
+		<link rel="stylesheet" href="fpsexample.css" type="text/css" media="screen">
 	</head>
 	<body>
 		<script src="libraries/three.min.js"></script>
@@ -63,14 +11,17 @@
 		<script src="inputmanager.js"></script>
 		<script src="worldmanager.js"></script>
 		<script src="networkmanager.js"></script>
+		<script src="enemymanager.js"></script>
 		<div id="blocker">
-
 			<div id="instructions">
 				<span style="font-size:40px">Click to play</span>
 				<br />
 				(W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
 			</div>
-
+		</div>
+		<div id="health">
+			<div id="percent">Health: <span id="p"></span></div>
+			<progress id="progress-bar" value="100" max="100"></progress>
 		</div>
         <script src="libraries/Physics/cannon.js"></script>
 		<script src="fpsexample.js"></script>
