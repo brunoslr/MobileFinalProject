@@ -2,6 +2,15 @@ var WebSocketServer = require('ws').Server
   , wss = new WebSocketServer({ port: 8080 });
 var IDIterator= 0;
 var wsArray = new Array();
+var worldData= "world data\n";
+
+var posX, posY, posZ;
+for(var i=0; i<50; i++){
+	posX = Math.floor(Math.random() * 20 - 10) * 20;
+	posY = Math.floor(Math.random() * 20) * 20 + 10;
+	posZ = Math.floor(Math.random() * 20 - 10) * 20;
+	worldData = worldData + posX + "\n" + posY + "\n" + posZ + "\n";
+}
 
 function WebConnection(con){
 	this.connection=con;
@@ -18,7 +27,7 @@ wss.on('connection', function connection(ws) {
 		case "id request"://handshake message
 		var newConnection = new WebConnection(ws);
 		wsArray.push(newConnection);
-		newConnection.connection.send("handshake\n" + newConnection.ID);
+		newConnection.connection.send("handshake\n" + newConnection.ID + "\n" + worldData);
 		break;
 		case "position update":
 			for(var i= 0; i<wsArray.length; i++){
@@ -29,6 +38,9 @@ wss.on('connection', function connection(ws) {
 				}
 			}
 		break;
+		case "bullet spawn":
+			sendToAllBut(message,splitArray[1]);
+		break;
 		
 		default:
 		break;
@@ -36,6 +48,35 @@ wss.on('connection', function connection(ws) {
   });
   
 });
+
+function sendTo(index, msg){
+	if(wsArray[index].connection!=null){//send an update if the connection is still valid
+		try{
+			wsArray[index].connection.send(msg);
+		}
+		catch(err){
+			console.log(err);
+			wsArray.splice(index,1);
+		}
+	}else{//remove the element if not valid
+	wsArray.splice(index,1);
+	}
+}
+
+function sendToAll(msg){
+	for(var i= 0; i<wsArray.length; i++){
+		sendTo(i,msg);
+	}
+}
+
+function sendToAllBut(msg, exceptionID){
+	for(var i= 0; i<wsArray.length; i++){
+		if(wsArray[i].ID!=exceptionID){
+			sendTo(i,msg);
+		}
+	}
+}
+
 
 var timer= setInterval(function() { 
 	var positionUpdate = "position update\n";
@@ -45,19 +86,7 @@ var timer= setInterval(function() {
 		positionUpdate= positionUpdate + (wsArray[i].position.y + "\n");
 		positionUpdate= positionUpdate + (wsArray[i].position.z + "\n");
 	}
-	for(var i=0; i<wsArray.length; i++){
-		if(wsArray[i].connection!=null){//send an update if the connection is still valid
-		try{
-			wsArray[i].connection.send(positionUpdate);
-		}
-		catch(err){
-			console.log(err);
-			wsArray.splice(i,1);
-		}
-		}else{//remove the element if not valid
-		wsArray.splice(i,1);
-		}
-	}
+	sendToAll(positionUpdate);
 },1000/30);
 
 

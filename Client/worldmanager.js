@@ -76,15 +76,23 @@ WorldManager.prototype.addBoxes= function(scene, objects)
 }
 	
 
-WorldManager.prototype.addBoxes= function(){
-	var geometry = new THREE.BoxGeometry( 20, 20, 20 );
-	for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
-
-		var face = geometry.faces[ i ];
-		face.vertexColors[ 0 ] = new THREE.Color().setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-		face.vertexColors[ 1 ] = new THREE.Color().setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-		face.vertexColors[ 2 ] = new THREE.Color().setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-
+/*WorldManager.prototype.addBoxes= function(){
+	var halfExtents = new CANNON.Vec3(1, 1, 1);
+	var boxShape = new CANNON.Box(halfExtents);
+	for (var i = 0; i < 50; i++) {
+		// TODO: Change material, for performance
+		material = new THREE.MeshPhongMaterial({ specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors });
+		var mesh = new THREE.Mesh(geometry, material);
+		mesh.position.x = Math.floor(Math.random() * 20 - 10) * 20;
+		mesh.position.y = Math.floor(Math.random() * 20) * 20 + 10;
+		mesh.position.z = Math.floor(Math.random() * 20 - 10) * 20;
+		scene.add(mesh);
+		material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+		objects.push(mesh);
+		var boxBody = new CANNON.Body({ mass: 5 });
+		boxBody.addShape(boxShape);
+		world.add(boxBody);
+		physicsObjects.push(boxBody);
 	}
 
 	for ( var i = 0; i < 1000; i ++ )
@@ -102,4 +110,4 @@ WorldManager.prototype.addBoxes= function(){
 
 		objects.push( mesh );
 	}
-}
+} */
