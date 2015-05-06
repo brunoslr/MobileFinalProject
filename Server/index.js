@@ -2,6 +2,15 @@ var WebSocketServer = require('ws').Server
   , wss = new WebSocketServer({ port: 8080 });
 var IDIterator= 0;
 var wsArray = new Array();
+var worldData= "world data\n";
+
+var posX, posY, posZ;
+for(var i=0; i<50; i++){
+	posX = Math.floor(Math.random() * 20 - 10) * 20;
+	posY = Math.floor(Math.random() * 20) * 20 + 10;
+	posZ = Math.floor(Math.random() * 20 - 10) * 20;
+	worldData = worldData + posX + "\n" + posY + "\n" + posZ + "\n";
+}
 
 function WebConnection(con){
 	this.connection=con;
@@ -18,7 +27,7 @@ wss.on('connection', function connection(ws) {
 		case "id request"://handshake message
 		var newConnection = new WebConnection(ws);
 		wsArray.push(newConnection);
-		newConnection.connection.send("handshake\n" + newConnection.ID);
+		newConnection.connection.send("handshake\n" + newConnection.ID + "\n" + worldData);
 		break;
 		case "position update":
 			for(var i= 0; i<wsArray.length; i++){

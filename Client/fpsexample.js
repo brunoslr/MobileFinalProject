@@ -147,10 +147,12 @@ this.onload = function () {
         mesh.receiveShadow = true;
         mesh.castShadow = true;
         scene.add(mesh);
+		
+		
 
         // objects
 
-        geometry = new THREE.BoxGeometry(20, 20, 20);
+        /*geometry = new THREE.BoxGeometry(20, 20, 20);
 
         for (var i = 0, l = geometry.faces.length; i < l; i++) {
 
@@ -178,7 +180,7 @@ this.onload = function () {
             boxBody.addShape(boxShape);
             world.add(boxBody);
             physicsObjects.push(boxBody);
-        }
+        }*/
 
 		//enemies
 		//adding red cubes as enemies
@@ -219,7 +221,6 @@ this.onload = function () {
         window.addEventListener('resize', onWindowResize, false);
 
     }
-
 
     function initCannon() {
         world = new CANNON.World();
@@ -415,6 +416,8 @@ this.onload = function () {
 		ballBody.position.set(positionVector.x, positionVector.y,positionVector.z);
 		ballMesh.position.set(positionVector.x, positionVector.y,positionVector.z);
 	}
+	
+	
 	
 }
 

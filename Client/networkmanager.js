@@ -9,6 +9,7 @@ function NetworkManager(){
 	this.state = 0;
 	this.controls = "";
 	this.playerID= -1;
+	this.addedBoxes= false;
 	this.otherPlayerData= new Array();
 	this.update = function(controls){
 		//console.log(controls.getObject().x + " " + controls.getObject().y + " " + controls.getObject.z);
@@ -42,6 +43,7 @@ function NetworkManager(){
 					this.state= 3;
 					this.playerID= parseInt(splitString[1]);
 					console.log("id request: " + this.playerID);
+					this.addBoxes(event.data);
 				}
 			break;
 			
@@ -64,13 +66,10 @@ function NetworkManager(){
 					}
 				}
 			break;
-			
 			case "bullet spawn":
 				this.spawnBullet(new THREE.Vector3(parseFloat(splitString[2]),parseFloat(splitString[3]),parseFloat(splitString[4])),
 							new THREE.Vector3(parseFloat(splitString[5]),parseFloat(splitString[6]),parseFloat(splitString[7])));
 			break;
-			
-			
 		}
 	};
 	
@@ -134,5 +133,60 @@ function NetworkManager(){
 		ballBody.position.set(positionVector.x, positionVector.y,positionVector.z);
 		ballMesh.position.set(positionVector.x, positionVector.y,positionVector.z);
 	};
+	
+	this.addBoxes= function(worldData){
+		var geometry = new THREE.BoxGeometry(20, 20, 20);
+        for (var i = 0, l = geometry.faces.length; i < l; i++) {
+
+            var face = geometry.faces[i];
+            face.vertexColors[0] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            face.vertexColors[1] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            face.vertexColors[2] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+
+        }
+		var halfExtents = new CANNON.Vec3(1, 1, 1);
+		var boxShape = new CANNON.Box(halfExtents);
+		var splitString= worldData.split("\n");
+		if(!this.addedBoxes){
+			this.addedBoxes=true;
+			if(splitString.length>1){
+				for (var j = 3; j < splitString.length-1; j+=3) {
+					// TODO: Change material, for performance
+					var material = new THREE.MeshPhongMaterial({ specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors });
+					var mesh = new THREE.Mesh(geometry, material);
+					console.log("run");
+					
+					
+					mesh.position.x = parseFloat(splitString[j]);
+					mesh.position.y = parseFloat(splitString[j+1]);
+					mesh.position.z = parseFloat(splitString[j+2]);
+					scene.add(mesh);
+					material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+					objects.push(mesh);
+					var boxBody = new CANNON.Body({ mass: 5 });
+					boxBody.addShape(boxShape);
+					world.add(boxBody);
+					physicsObjects.push(boxBody);
+				}
+			}
+			else{
+				for (var i = 0; i < 50; i++) {
+					// TODO: Change material, for performance
+					var material = new THREE.MeshPhongMaterial({ specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors });
+					var mesh = new THREE.Mesh(geometry, material);
+					mesh.position.x = Math.floor(Math.random() * 20 - 10) * 20;
+					mesh.position.y = Math.floor(Math.random() * 20) * 20 + 10;
+					mesh.position.z = Math.floor(Math.random() * 20 - 10) * 20;
+					scene.add(mesh);
+					material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+					objects.push(mesh);
+					var boxBody = new CANNON.Body({ mass: 5 });
+					boxBody.addShape(boxShape);
+					world.add(boxBody);
+					physicsObjects.push(boxBody);
+				}
+			}
+		}
+	}
 	
 };
