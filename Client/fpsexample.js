@@ -5,8 +5,8 @@ this.onload = function () {
     var camera, scene, renderer;
     var geometry;
     var controls;
-    var player;
-    var shootVelo =8.5;
+    var player, player2;
+    var shootVelo = 8.5;
     var objects = [];
     var enemies= [];
 	var health = 100;
@@ -118,9 +118,12 @@ this.onload = function () {
 
         player = controls.getObject();;
         scene.add(player);
-	    networkManager = new NetworkManager();
+        player2 = controls.getObject();;
+        scene.add(player2);
+		networkManager = new NetworkManager();
 
-        raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
+        //raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
+		
         loader = new THREE.JSONLoader();
         //init floor
         worldManager.initFloor(scene);
@@ -154,58 +157,148 @@ this.onload = function () {
     {
         if (inputManager.controlsEnabled)
         {
-			
-			healthbar.value = healthbar.value - 1;
-			
 			networkManager.update(controls);
-            raycaster.ray.origin.copy(player.position);	
-            raycaster.ray.origin.y -= 10;
-
-            var intersections = raycaster.intersectObjects(objects);
-
-            var isOnObject = intersections.length > 0;
-
-            var time = performance.now();
-            var delta = (time - prevTime) / 1000;
-
-            velocity.x -= velocity.x * 10.0 * delta;
-            velocity.z -= velocity.z * 10.0 * delta;
-
-            velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-            if (inputManager.moveJump) {
-                velocity.y += 350;
-                inputManager.moveJump = false;
-            }
-
-            if (inputManager.moveForward) velocity.z -= 400.0 * delta;
-            if (inputManager.moveBackward) velocity.z += 400.0 * delta;
-
-            if (inputManager.moveLeft) velocity.x -= 400.0 * delta;
-            if (inputManager.moveRight) velocity.x += 400.0 * delta;
-
-            if (isOnObject === true) {
-                velocity.y = Math.max(0, velocity.y);
-                inputManager.canJump = true;
-            }
-
-            player.translateX(velocity.x * delta);
-            player.translateY(velocity.y * delta);
-            player.translateZ(velocity.z * delta);
-
+            
+			collisionDetectionAndMovement();
+			
             if (player.position.y < 10) {
                 velocity.y = 0;
                 player.position.y = 10;
                 inputManager.canJump = true;
             }
+            raycaster.ray.origin.copy(player.position);	
+            raycaster.ray.origin.y -= 10;
 
-            prevTime = time;
             moveProjectiles();
             bulletsHandle();
 
             enemyManager.moveEnemies(enemies, player);
-			
         }
     }
+	
+	function collisionDetectionAndMovement()
+	{
+		
+			// https://github.com/mrdoob/three.js/issues/1606
+			// http://stackoverflow.com/questions/15696963/three-js-set-and-read-camera-look-vector
+			
+			
+			// Set the player's velocity
+            var time = performance.now();
+            var delta = (time - prevTime) / 1000;
+            velocity.x -= velocity.x * 10.0 * delta;
+            velocity.z -= velocity.z * 10.0 * delta;
+            velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+			
+			// check if jumping
+            if (inputManager.moveJump) {
+                velocity.y += 350;
+                inputManager.moveJump = false;
+            }
+			
+			// check about if the player is moving 
+            if (inputManager.moveForward) velocity.z -= 400.0 * delta;
+            if (inputManager.moveBackward) velocity.z += 400.0 * delta;
+            if (inputManager.moveLeft) velocity.x -= 400.0 * delta;
+            if (inputManager.moveRight) velocity.x += 400.0 * delta;
+			
+			// move the player, preemptively
+			player.translateX(velocity.x * delta);
+			player.translateY(velocity.y * delta);
+			player.translateZ(velocity.z * delta);
+			
+			// Create a new matrix and vector
+			var matrix = new THREE.Matrix4();
+			matrix.extractRotation( player2.matrix );
+			var direction = new THREE.Vector3( 0, 0, -1 );  // Forward
+			direction = matrix.multiplyVector3( direction );
+			
+			// raycast from the player's temp posistion in the direction they are facing
+			var raycaster = new THREE.Raycaster(player2.position, direction);
+			raycaster.intersectObjects(objects);
+            var intersections = raycaster.intersectObjects(objects);
+			var isColliding = false;
+			for(var i = 0; i < intersections.length; i++)
+			{
+				if(intersections[i].distance <= 2 )
+				{
+					isColliding = true;
+				}
+			}
+			
+			
+			// Create a new matrix and vector
+			var matrix2 = new THREE.Matrix4();
+			matrix2.extractRotation( player2.matrix );
+			var direction2 = new THREE.Vector3( 0, 0, 1 ); // Backward
+			direction2 = matrix2.multiplyVector3( direction2 );
+			
+			// raycast from the player's temp posistion in the direction they are facing
+			var raycaster2 = new THREE.Raycaster(player2.position, direction2);
+			raycaster2.intersectObjects(objects);
+            var intersections2 = raycaster2.intersectObjects(objects);
+			for(var i = 0; i < intersections2.length; i++)
+			{
+				if(intersections2[i].distance <= 2 )
+				{
+					isColliding = true;
+				}
+			}
+			
+			
+			// Create a new matrix and vector
+			var matrix3 = new THREE.Matrix4();
+			matrix3.extractRotation( player2.matrix );
+			var direction3 = new THREE.Vector3( 1, 0, 0 ); // Left?
+			direction3 = matrix3.multiplyVector3( direction3 );
+			
+			// raycast from the player's temp posistion in the direction they are facing
+			var raycaster3 = new THREE.Raycaster(player2.position, direction3);
+			raycaster3.intersectObjects(objects);
+            var intersections3 = raycaster3.intersectObjects(objects);
+			for(var i = 0; i < intersections3.length; i++)
+			{
+				if(intersections3[i].distance <= 2 )
+				{
+					isColliding = true;
+				}
+			}
+			
+			
+			// Create a new matrix and vector
+			var matrix4 = new THREE.Matrix4();
+			matrix4.extractRotation( player2.matrix );
+			var direction4 = new THREE.Vector3( -1, 0, 0 ); // Right?
+			direction4 = matrix3.multiplyVector3( direction4 );
+			
+			// raycast from the player's temp posistion in the direction they are facing
+			var raycaster4 = new THREE.Raycaster(player2.position, direction4);
+			raycaster4.intersectObjects(objects);
+            var intersections4 = raycaster4.intersectObjects(objects);
+			for(var i = 0; i < intersections4.length; i++)
+			{
+				if(intersections4[i].distance <= 2 )
+				{
+					isColliding = true;
+				}
+			}
+			
+			// if the player is colliding then move them back/prevent them
+			if(isColliding == true)
+			{
+				player.translateX(-velocity.x * delta);
+				player.translateY(velocity.y * delta);
+				player.translateZ(-velocity.z * delta);
+			}
+			else
+			{
+				// do nothing
+			}
+			
+
+            prevTime = time;
+			
+	}
 
     function bulletsHandle()
     {

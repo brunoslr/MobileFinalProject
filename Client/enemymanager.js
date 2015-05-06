@@ -45,7 +45,10 @@ EnemyManager.prototype.initEnemies=function(scene, enemies, loader)
     //     face.vertexColors[2] = new THREE.Color(1, 0, 0);
     // }
 
-    for(var i=0; i<2; i++)
+    }
+
+    //for (var i = 0; i < 200; i++)
+    for (var i = 0; i < 1; i++)
     {
         var mesh;
         loader.load('Models/IronMan.js', function (geometry, materials) {
