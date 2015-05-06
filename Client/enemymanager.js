@@ -35,66 +35,66 @@ EnemyManager.prototype.moveEnemies=function(enemies, player)
 EnemyManager.prototype.initEnemies=function(scene, enemies, loader)
 {
 
-    //var geometry = new THREE.BoxGeometry(10, 20, 10);
-    // for (var i = 0, l = geometry.faces.length; i < l; i++)
-    // {
+    var geometry = new THREE.BoxGeometry(10, 20, 10);
+    for (var i = 0, l = geometry.faces.length; i < l; i++)
+    {
 
-    //     var face = geometry.faces[i];
-    //     face.vertexColors[0] = new THREE.Color(1, 0, 0);
-    //     face.vertexColors[1] = new THREE.Color(1, 0, 0);
-    //     face.vertexColors[2] = new THREE.Color(1, 0, 0);
-    // }
-
+        var face = geometry.faces[i];
+        // face.vertexcolors[0] = new THREE.Color(1, 0, 0);
+        // face.vertexcolors[1] = new THREE.Color(1, 0, 0);
+        // face.vertexcolors[2] = new THREE.Color(1, 0, 0);
     }
+
+    
 
     //for (var i = 0; i < 200; i++)
-    for (var i = 0; i < 1; i++)
-    {
-        var mesh;
-        loader.load('Models/IronMan.js', function (geometry, materials) {
-        var material = new THREE.MeshNormalMaterial({
+    // for (var i = 0; i < 1; i++)
+    // {
+        // var mesh;
+        // loader.load('Models/IronMan.js', function (geometry, materials) {
+        // var material = new THREE.MeshNormalMaterial({
            
-            colorAmbient: [0.480000026226044, 0.480000026226044, 0.480000026226044],
-            colorDiffuse: [0.480000026226044, 0.480000026226044, 0.480000026226044],
-            colorSpecular: [0.8999999761581421, 0.8999999761581421, 0.8999999761581421]
+            // colorAmbient: [0.480000026226044, 0.480000026226044, 0.480000026226044],
+            // colorDiffuse: [0.480000026226044, 0.480000026226044, 0.480000026226044],
+            // colorSpecular: [0.8999999761581421, 0.8999999761581421, 0.8999999761581421]
+        // });
+
+        // mesh = new THREE.Mesh(
+                // geometry,
+                // material
+        // );
+
+        // mesh.receiveShadow = true;
+        // mesh.castShadow = true;
+        // mesh.position.x = Math.floor(Math.random() * 20 - 10) * 20;
+        // mesh.position.y = 10;
+        // mesh.position.z = Math.floor(Math.random() * 20 - 10) * 20;
+        // mesh.scale.set(0.05,0.05,0.05);
+        // scene.add(mesh);
+        // enemies.push(mesh);
+        // });
+    // }
+
+    for (var i = 0; i < 200; i++)
+    {
+
+        var material = new THREE.MeshPhongMaterial({
+            specular: 0xffffff,
+            shading: THREE.FlatShading,
+            vertexColors: THREE.VertexColors
         });
 
-        mesh = new THREE.Mesh(
-                geometry,
-                material
-        );
-
-        mesh.receiveShadow = true;
-        mesh.castShadow = true;
+        var mesh = new THREE.Mesh(geometry, material);
         mesh.position.x = Math.floor(Math.random() * 20 - 10) * 20;
+        // mesh.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
         mesh.position.y = 10;
         mesh.position.z = Math.floor(Math.random() * 20 - 10) * 20;
-        mesh.scale.set(0.05,0.05,0.05);
         scene.add(mesh);
-        enemies.push(mesh);
-        });
+
+        material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+
+       enemies.push(mesh);
     }
-
-    // for (var i = 0; i < 200; i++)
-    // {
-
-    //     var material = new THREE.MeshPhongMaterial({
-    //         specular: 0xffffff,
-    //         shading: THREE.FlatShading,
-    //         vertexColors: THREE.VertexColors
-    //     });
-
-    //     var mesh = new THREE.Mesh(geometry, material);
-    //     mesh.position.x = Math.floor(Math.random() * 20 - 10) * 20;
-    //     // mesh.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
-    //     mesh.position.y = 10;
-    //     mesh.position.z = Math.floor(Math.random() * 20 - 10) * 20;
-    //     scene.add(mesh);
-
-    //     material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-
-    //    enemies.push(mesh);
-    //}
 
 
 }
