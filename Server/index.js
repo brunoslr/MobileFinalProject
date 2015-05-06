@@ -29,6 +29,9 @@ wss.on('connection', function connection(ws) {
 				}
 			}
 		break;
+		case "bullet spawn":
+			sendToAllBut(message,splitArray[1]);
+		break;
 		
 		default:
 		break;
@@ -36,6 +39,35 @@ wss.on('connection', function connection(ws) {
   });
   
 });
+
+function sendTo(index, msg){
+	if(wsArray[index].connection!=null){//send an update if the connection is still valid
+		try{
+			wsArray[index].connection.send(msg);
+		}
+		catch(err){
+			console.log(err);
+			wsArray.splice(index,1);
+		}
+	}else{//remove the element if not valid
+	wsArray.splice(index,1);
+	}
+}
+
+function sendToAll(msg){
+	for(var i= 0; i<wsArray.length; i++){
+		sendTo(i,msg);
+	}
+}
+
+function sendToAllBut(msg, exceptionID){
+	for(var i= 0; i<wsArray.length; i++){
+		if(wsArray[i].ID!=exceptionID){
+			sendTo(i,msg);
+		}
+	}
+}
+
 
 var timer= setInterval(function() { 
 	var positionUpdate = "position update\n";
@@ -45,19 +77,7 @@ var timer= setInterval(function() {
 		positionUpdate= positionUpdate + (wsArray[i].position.y + "\n");
 		positionUpdate= positionUpdate + (wsArray[i].position.z + "\n");
 	}
-	for(var i=0; i<wsArray.length; i++){
-		if(wsArray[i].connection!=null){//send an update if the connection is still valid
-		try{
-			wsArray[i].connection.send(positionUpdate);
-		}
-		catch(err){
-			console.log(err);
-			wsArray.splice(i,1);
-		}
-		}else{//remove the element if not valid
-		wsArray.splice(i,1);
-		}
-	}
+	sendToAll(positionUpdate);
 },1000/30);
 
 

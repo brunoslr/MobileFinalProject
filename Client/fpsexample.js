@@ -17,6 +17,18 @@ var shootVelo = 55;
 
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
+	
+	
+    var ballShape = new CANNON.Sphere(2);
+    var ballMaterial = new THREE.MeshPhongMaterial({
+        wireframe: true,
+        color: 0xff0000
+    });
+    var ballGeometry = new THREE.SphereGeometry(ballShape.radius, 8, 6);
+    var shootDirection = new THREE.Vector3();
+    var projector = new THREE.Projector();
+    var balls = [];
+    var ballMeshes = [];
 this.onload = function () {
 
     // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
@@ -364,16 +376,6 @@ this.onload = function () {
     }
 
 
-    var ballShape = new CANNON.Sphere(2);
-    var ballMaterial = new THREE.MeshPhongMaterial({
-        wireframe: true,
-        color: 0xff0000
-    });
-    var ballGeometry = new THREE.SphereGeometry(ballShape.radius, 8, 6);
-    var shootDirection = new THREE.Vector3();
-    var projector = new THREE.Projector();
-    var balls = [];
-    var ballMeshes = [];
     
 	function getShootDir(targetVec) {
         var vector = targetVec;
@@ -384,30 +386,35 @@ this.onload = function () {
     }
     
 	window.addEventListener("click", function (e) {
-        //if (controls.enabled == true) 
         {
             var x = controls.getObject().position.x;
             var y = controls.getObject().position.y;
             var z = controls.getObject().position.z;
-            var ballBody = new CANNON.Body({ mass: 1 });
-            ballBody.addShape(ballShape);
-            var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
-            world.add(ballBody);
-            scene.add(ballMesh);
-            ballMesh.castShadow = true;
-            ballMesh.receiveShadow = true;
-            balls.push(ballBody);
-            ballMeshes.push(ballMesh);
             getShootDir(shootDirection);
-            ballBody.velocity.set(shootDirection.x * shootVelo,
-                                    shootDirection.y * shootVelo,
-                                    shootDirection.z * shootVelo);
+			var bulletVelocity= new THREE.Vector3(shootDirection.x * shootVelo, shootDirection.y * shootVelo,shootDirection.z * shootVelo)
             // Move the ball outside the player sphere
             x += shootDirection.x * (sphereShape.radius * 1.02 + ballShape.radius);
             y += shootDirection.y * (sphereShape.radius * 1.02 + ballShape.radius);
             z += shootDirection.z * (sphereShape.radius * 1.02 + ballShape.radius);
-            ballBody.position.set(x, y, z);
-            ballMesh.position.set(x, y, z);
+			var bulletPosition= new THREE.Vector3(x,y,z);
+			networkManager.spawnBullet(bulletPosition,bulletVelocity);
+			networkManager.sendBullet(bulletPosition,bulletVelocity);
         }
     });
+	function spawnBullet(positionVector, velocityVector){
+		var ballBody = new CANNON.Body({ mass: 1 });
+		ballBody.addShape(ballShape);
+		var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
+		world.add(ballBody);
+		scene.add(ballMesh);
+		ballMesh.castShadow = true;
+		ballMesh.receiveShadow = true;
+		balls.push(ballBody);
+		ballMeshes.push(ballMesh);
+		ballBody.velocity.set(velocityVector.x,velocityVector.y,velocityVector.z);
+		ballBody.position.set(positionVector.x, positionVector.y,positionVector.z);
+		ballMesh.position.set(positionVector.x, positionVector.y,positionVector.z);
+	}
+	
 }
+

@@ -64,21 +64,23 @@ function NetworkManager(){
 					}
 				}
 			break;
+			
+			case "bullet spawn":
+				this.spawnBullet(new THREE.Vector3(parseFloat(splitString[2]),parseFloat(splitString[3]),parseFloat(splitString[4])),
+							new THREE.Vector3(parseFloat(splitString[5]),parseFloat(splitString[6]),parseFloat(splitString[7])));
+			break;
+			
+			
 		}
 	};
 	
 	this.updateServer = function(event){
 		var updateString = "position update\n";
 		updateString= updateString + (this.playerID + "\n");
-		updateString= updateString + (this.controls.getObject().position.x + "\n");
-		updateString= updateString + (this.controls.getObject().position.y + "\n");
-		updateString= updateString + (this.controls.getObject().position.z + "\n");
-		this.exampleSocket.send(updateString);
+		updateString= updateString + (this.controls.getObject().position.x + "\n")+ (this.controls.getObject().position.y + "\n")+ (this.controls.getObject().position.z + "\n");
+		this.send(updateString);
 	};
 	
-	this.sendBulletData = function (bullet){
-		
-	};
 	
 	this.addPlayer = function(curPlayerID, newX, newY, newZ){
 		var geometry = new THREE.BoxGeometry( 10, 20, 10 );
@@ -100,6 +102,37 @@ function NetworkManager(){
 		this.otherPlayerData[curPlayerID]=newPlayer;
 		material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
 		//objects.push( mesh );
+	};
+	
+	this.sendBullet = function(positionVector, velocityVector){
+		if(this.state==3){
+			var updateString= "bullet spawn\n";
+			updateString= updateString + "" + this.playerID + "\n";
+			updateString= updateString + positionVector.x + "\n"+ positionVector.y + "\n"+ positionVector.z + "\n";
+			updateString= updateString + velocityVector.x + "\n"+ velocityVector.y + "\n"+ velocityVector.z + "\n";
+			this.send(updateString);
+		}
+	};
+
+	this.send = function(obj){
+		if(this.exampleSocket){
+			this.exampleSocket.send(obj);
+		}
+	};
+	
+	this.spawnBullet= function(positionVector, velocityVector){
+		var ballBody = new CANNON.Body({ mass: 1 });
+		ballBody.addShape(ballShape);
+		var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
+		world.add(ballBody);
+		scene.add(ballMesh);
+		ballMesh.castShadow = true;
+		ballMesh.receiveShadow = true;
+		balls.push(ballBody);
+		ballMeshes.push(ballMesh);
+		ballBody.velocity.set(velocityVector.x,velocityVector.y,velocityVector.z);
+		ballBody.position.set(positionVector.x, positionVector.y,positionVector.z);
+		ballMesh.position.set(positionVector.x, positionVector.y,positionVector.z);
 	};
 	
 };
