@@ -1,6 +1,6 @@
 
 
-function InputManager(){
+function InputManager() {
 	this.moveForward = false;
 	this.moveBackward = false;
 	this.moveLeft = false;
@@ -8,21 +8,45 @@ function InputManager(){
 	this.moveJump = false;
 	this.canJump = false;
 	this.isSprinting = false;
-	this.controlsEnabled= false;
+	this.controlsEnabled = false;
+	this.acceleration = new THREE.Vector3();
 	window.addEventListener( 'keydown', this, false );
-	window.addEventListener( 'keyup', this, false );
+	window.addEventListener('keyup', this, false);
+	window.addEventListener('ondevicemotion', this, false); //Usually words with safari and opera
+	window.addEventListener('ondeviceorientation', this, false); //For chrome
+	window.addEventListener('onmozorientation', this, false); //For Moz
+	this.accLeft = false;
+	this.accRight = false;
 }
 
-
 InputManager.prototype.handleEvent= function(e){
-	if(e.type=="keydown"){
+	if( e.type=="keydown" ) {
 		this.onKeyDown(event);
 	}
-	else if(e.type=="keyup"){
+	else if( e.type=="keyup" ) {
 		this.onKeyUp(event);
+	}
+	else if ( e.type == "ondevicemotion" || e.type == "onmozorientation" || e.type == "ondeviceorientation" ) {
+	    this.onAccelerometerChanged(event);
 	}
 };
 
+
+InputManager.prototype.onAccelerometerChanged = function(event) {
+    var y = event.acceleration.y;
+    console.log(y);
+    
+    if ( y < -0.20 && !this.accRight )
+        this.accLeft = true;
+    if  ( y > 0.20 && this.accLeft )
+    {
+        this.accLeft = false;
+        this.moveForward = true;
+        //var para = document.createElement("p");
+        //var node = document.createTextNode("This is new.");
+        //para.appendChild(node);
+    }
+}
 
 InputManager.prototype.onKeyDown= function(event){
 	switch ( event.keyCode ) {
@@ -58,7 +82,6 @@ InputManager.prototype.onKeyDown= function(event){
 };
 InputManager.prototype.onKeyUp= function(event){
 	switch( event.keyCode ) {
-
 		case 38: // up
 		case 87: // w
 			this.moveForward = false;

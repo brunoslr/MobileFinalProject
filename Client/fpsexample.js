@@ -1,5 +1,7 @@
 var debugBuild = true;
 var shootVelo = 55;
+var totalEnemies = 10;
+
 
 this.onload = function () {
     var camera, scene, renderer;
@@ -19,9 +21,6 @@ this.onload = function () {
 
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
-
-    // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
-
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
     if (havePointerLock) {
@@ -29,7 +28,6 @@ this.onload = function () {
         var pointerlockchange = function (event) {
             if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
                 inputManager.controlsEnabled = true;
-                console.log(inputManager.controlsEnabled);
                 controls.enabled = true;
                 blocker.style.display = 'none';
 
@@ -85,6 +83,7 @@ this.onload = function () {
     init();
     update();
     draw();
+
 
     var prevTime = performance.now();
     var velocity = new THREE.Vector3();
@@ -210,7 +209,6 @@ this.onload = function () {
 
     }
 
-
     function initCannon() {
         world = new CANNON.World();
         world.quatNormalizeSkip = 0;
@@ -255,7 +253,6 @@ this.onload = function () {
         groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
         world.add(groundBody);
     }
-
 
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -320,7 +317,6 @@ this.onload = function () {
 						scene.remove(balls[i]);
 						ballMeshes.splice(i,1);
 						balls.splice(i,1);
-						console.log("Bullets:"+balls.length);
 					}
 					
 		
@@ -365,7 +361,6 @@ this.onload = function () {
         renderer.render(scene, camera);
     }
 
-
     var ballShape = new CANNON.Sphere(2);
     var ballMaterial = new THREE.MeshPhongMaterial({
         wireframe: true,
@@ -384,7 +379,7 @@ this.onload = function () {
         var ray = new THREE.Ray(sphereBody.position, vector.sub(sphereBody.position).normalize());
         targetVec.copy(ray.direction);
     }
-    
+
 	window.addEventListener("click", function (e) {
         //if (controls.enabled == true) 
         {
