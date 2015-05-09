@@ -103,6 +103,14 @@ function NetworkManager(){
 		//objects.push( mesh );
 	};
 	
+	this.spawnBullet = function(position, direction){
+		 var sphere = new THREE.Mesh( geometry, ballMaterial );
+        sphere.position.set(position.x, position.y, position.z);
+        balls1.push(sphere);
+        fVectors.push(direction);
+        scene.add( sphere );
+	};
+	
 	this.sendBullet = function(positionVector, velocityVector){
 		if(this.state==3){
 			var updateString= "bullet spawn\n";
@@ -117,21 +125,6 @@ function NetworkManager(){
 		if(this.exampleSocket){
 			this.exampleSocket.send(obj);
 		}
-	};
-	
-	this.spawnBullet= function(positionVector, velocityVector){
-		var ballBody = new CANNON.Body({ mass: 1 });
-		ballBody.addShape(ballShape);
-		var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
-		world.add(ballBody);
-		scene.add(ballMesh);
-		ballMesh.castShadow = true;
-		ballMesh.receiveShadow = true;
-		balls.push(ballBody);
-		ballMeshes.push(ballMesh);
-		ballBody.velocity.set(velocityVector.x,velocityVector.y,velocityVector.z);
-		ballBody.position.set(positionVector.x, positionVector.y,positionVector.z);
-		ballMesh.position.set(positionVector.x, positionVector.y,positionVector.z);
 	};
 	
 	this.addBoxes= function(worldData){

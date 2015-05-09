@@ -250,7 +250,7 @@ this.onload = function () {
 		var matrix = new THREE.Matrix4();
 		matrix.extractRotation( player2.matrix );
 		var direction = new THREE.Vector3( 0, 0, -1 );  // Forward
-		direction = matrix.multiplyVector3( direction );
+		direction = direction.applyMatrix4(matrix);
 		
 		// raycast from the player's temp posistion in the direction they are facing
 		var raycaster = new THREE.Raycaster(player2.position, direction);
@@ -270,7 +270,7 @@ this.onload = function () {
 		var matrix2 = new THREE.Matrix4();
 		matrix2.extractRotation( player2.matrix );
 		var direction2 = new THREE.Vector3( 0, 0, 1 ); // Backward
-		direction2 = matrix2.multiplyVector3( direction2 );
+		direction2 = direction2.applyMatrix4( matrix2 );
 		
 		// raycast from the player's temp posistion in the direction they are facing
 		var raycaster2 = new THREE.Raycaster(player2.position, direction2);
@@ -289,7 +289,7 @@ this.onload = function () {
 		var matrix3 = new THREE.Matrix4();
 		matrix3.extractRotation( player2.matrix );
 		var direction3 = new THREE.Vector3( 1, 0, 0 ); // Left?
-		direction3 = matrix3.multiplyVector3( direction3 );
+		direction3 = direction3.applyMatrix4( matrix3 );
 		
 		// raycast from the player's temp posistion in the direction they are facing
 		var raycaster3 = new THREE.Raycaster(player2.position, direction3);
@@ -308,7 +308,7 @@ this.onload = function () {
 		var matrix4 = new THREE.Matrix4();
 		matrix4.extractRotation( player2.matrix );
 		var direction4 = new THREE.Vector3( -1, 0, 0 ); // Right?
-		direction4 = matrix3.multiplyVector3( direction4 );
+		direction4 = direction4.applyMatrix4( matrix4 );
 		
 		// raycast from the player's temp posistion in the direction they are facing
 		var raycaster4 = new THREE.Raycaster(player2.position, direction4);
@@ -365,20 +365,10 @@ this.onload = function () {
 	function getShootDir(targetVec) {
         var vector = targetVec;
         targetVec.set(0, 0, 1);
-        projector.unprojectVector(vector, camera);
+		vector.unproject(camera);
+        //projector.unprojectVector(vector, camera);
         var ray = new THREE.Ray(player.position, vector.sub(player.position).normalize());
         targetVec.copy(ray.direction);
-    }
-
-    function drawSphere(position)
-    {
-        var sphere = new THREE.Mesh( geometry, ballMaterial );
-        var shootDirection = new THREE.Vector3();
-        sphere.position.set(position.x, position.y, position.z);
-        balls1.push(sphere);
-        getShootDir(shootDirection);
-        fVectors.push(shootDirection);
-        scene.add( sphere );
     }
 
     function moveProjectiles()
@@ -390,39 +380,12 @@ this.onload = function () {
         }
     }
 	window.addEventListener("click", function (e) {
-
         {
-            drawSphere(player.position);
-            var x = controls.getObject().position.x;
-            var y = controls.getObject().position.y;
-            var z = controls.getObject().position.z;
-            getShootDir(shootDirection);
-			var bulletVelocity= new THREE.Vector3(shootDirection.x * shootVelo, shootDirection.y * shootVelo,shootDirection.z * shootVelo)
-            // Move the ball outside the player sphere
-            x += shootDirection.x * (sphereShape.radius * 1.02 + ballShape.radius);
-            y += shootDirection.y * (sphereShape.radius * 1.02 + ballShape.radius);
-            z += shootDirection.z * (sphereShape.radius * 1.02 + ballShape.radius);
-			var bulletPosition= new THREE.Vector3(x,y,z);
-			networkManager.spawnBullet(bulletPosition,bulletVelocity);
-			networkManager.sendBullet(bulletPosition,bulletVelocity);
+			var shootDirection = new THREE.Vector3();
+			getShootDir(shootDirection);
+            networkManager.spawnBullet(player.position, shootDirection);
+			networkManager.sendBullet(player.position,shootDirection);
         }
     });
-	function spawnBullet(positionVector, velocityVector){
-		var ballBody = new CANNON.Body({ mass: 1 });
-		ballBody.addShape(ballShape);
-		var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
-		world.add(ballBody);
-		scene.add(ballMesh);
-		ballMesh.castShadow = true;
-		ballMesh.receiveShadow = true;
-		balls.push(ballBody);
-		ballMeshes.push(ballMesh);
-		ballBody.velocity.set(velocityVector.x,velocityVector.y,velocityVector.z);
-		ballBody.position.set(positionVector.x, positionVector.y,positionVector.z);
-		ballMesh.position.set(positionVector.x, positionVector.y,positionVector.z);
-	}
-	
-	
-	
 }
 

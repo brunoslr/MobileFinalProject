@@ -75,7 +75,7 @@ EnemyManager.prototype.initEnemies=function(scene, enemies, loader)
         // });
     // }
 
-    for (var i = 0; i < 200; i++)
+    for (var i = 0; i < 0; i++)
     {
 
         var material = new THREE.MeshPhongMaterial({
