@@ -18,7 +18,7 @@ WorldManager.prototype.addLight=function(scene)
 
 WorldManager.prototype.initFloor= function(scene)
 {
-		var geometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
+		var geometry = new THREE.PlaneGeometry( 500, 500, 100, 100 );
 		geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
 
 		for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
@@ -52,9 +52,14 @@ WorldManager.prototype.addBoxes= function(scene, objects)
 	{
 
 		var face = geometry.faces[ i ];
-		face.vertexColors[ 0 ] = new THREE.Color( 1,0,0 );
-		face.vertexColors[ 1 ] = new THREE.Color( 1,0,0);
-		face.vertexColors[ 2 ] = new THREE.Color( 1,0,0 );
+		//face.vertexColors[ 0 ] = new THREE.Color( 0,1,1 );
+		//face.vertexColors[ 1 ] = new THREE.Color( 0,1,1 );
+		//face.vertexColors[ 2 ] = new THREE.Color( 0,1,1 );
+		
+		face.vertexColors[ 0 ] = new THREE.Color().setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+		face.vertexColors[ 1 ] = new THREE.Color().setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+		face.vertexColors[ 2 ] = new THREE.Color().setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+
 
 	}
 
@@ -70,8 +75,8 @@ WorldManager.prototype.addBoxes= function(scene, objects)
 		scene.add( mesh );
 
 		material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-
-		enemies.push( mesh );
+		objects.push(mesh);
+		//enemies.push( mesh );
 	}
 }
 	

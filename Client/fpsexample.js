@@ -38,12 +38,11 @@ var instructions = document.getElementById('instructions');
 
 	
 	
-    var ballShape = new CANNON.Sphere(2);
     var ballMaterial = new THREE.MeshPhongMaterial({
         wireframe: true,
         color: 0xff0000
     });
-    var ballGeometry = new THREE.SphereGeometry(ballShape.radius, 8, 6);
+    var ballGeometry = new THREE.SphereGeometry(1, 8, 6);
     var shootDirection = new THREE.Vector3();
     var projector = new THREE.Projector();
     var balls = [];

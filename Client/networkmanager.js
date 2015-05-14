@@ -42,7 +42,6 @@ function NetworkManager(){
 				if(this.state ==2 ){
 					this.state= 3;
 					this.playerID= parseInt(splitString[1]);
-					console.log("id request: " + this.playerID);
 					this.addBoxes(event.data);
 				}
 			break;
@@ -137,9 +136,10 @@ function NetworkManager(){
             face.vertexColors[2] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
 
         }
-		var halfExtents = new CANNON.Vec3(1, 1, 1);
-		var boxShape = new CANNON.Box(halfExtents);
+		//var halfExtents = new CANNON.Vec3(1, 1, 1);
+		//var boxShape = new CANNON.Box(halfExtents);
 		var splitString= worldData.split("\n");
+		console.log("s: " + splitString);
 		if(!this.addedBoxes){
 			this.addedBoxes=true;
 			if(splitString.length>1){
@@ -148,18 +148,17 @@ function NetworkManager(){
 					var material = new THREE.MeshPhongMaterial({ specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors });
 					var mesh = new THREE.Mesh(geometry, material);
 					console.log("run");
-					
-					
+							
 					mesh.position.x = parseFloat(splitString[j]);
 					mesh.position.y = parseFloat(splitString[j+1]);
 					mesh.position.z = parseFloat(splitString[j+2]);
 					scene.add(mesh);
 					material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
 					objects.push(mesh);
-					var boxBody = new CANNON.Body({ mass: 5 });
-					boxBody.addShape(boxShape);
-					world.add(boxBody);
-					physicsObjects.push(boxBody);
+					//var boxBody = new CANNON.Body({ mass: 5 });
+					//boxBody.addShape(boxShape);
+					//world.add(boxBody);
+					//physicsObjects.push(boxBody);
 				}
 			}
 			else{
