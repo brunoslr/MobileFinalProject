@@ -139,7 +139,7 @@ function NetworkManager(){
 		//var halfExtents = new CANNON.Vec3(1, 1, 1);
 		//var boxShape = new CANNON.Box(halfExtents);
 		var splitString= worldData.split("\n");
-		console.log("s: " + splitString);
+		//console.log("s: " + splitString);
 		if(!this.addedBoxes){
 			this.addedBoxes=true;
 			if(splitString.length>1){

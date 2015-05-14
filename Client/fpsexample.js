@@ -11,6 +11,7 @@ var shootVelo = 8.5;
 var objects = [];
 var enemies= [];
 var health = 100;
+var dt = 1/60;
 
 //3d model loading
 var loader;
@@ -128,13 +129,17 @@ this.onload = function () {
 
         loader= new THREE.JSONLoader();
 
-        controls = new THREE.PointerLockControls(camera);
+        //controls = new THREE.PointerLockControls(camera);
+		controls = new THREE.FirstPersonControls(camera);
+		controls.movementSpeed = 25.0;
+		controls.lookSpeed = 10.0;
+		controls.autoForward = false;
 
         player = controls.getObject();;
         scene.add(player);
         player2 = controls.getObject();;
         scene.add(player2);
-		networkManager = new NetworkManager();
+		//networkManager = new NetworkManager();
 
         raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 		
@@ -195,9 +200,15 @@ this.onload = function () {
     {
         if (inputManager.controlsEnabled)
         {
-			networkManager.update(controls);
+			//networkManager.update(controls);
+			
+			controls.update(dt, player);
+			player.rotation = controls.object.rotation;
+			console.log("mouseX = " + controls.mouseX);
             
 			collisionDetectionAndMovement();
+			//console.log(player.position);
+			//console.log(player.rotation);
 			
             if (player.position.y < 10) {
                 velocity.y = 0;
@@ -382,8 +393,8 @@ this.onload = function () {
         {
 			var shootDirection = new THREE.Vector3();
 			getShootDir(shootDirection);
-            networkManager.spawnBullet(player.position, shootDirection);
-			networkManager.sendBullet(player.position,shootDirection);
+            //networkManager.spawnBullet(player.position, shootDirection);
+			//networkManager.sendBullet(player.position,shootDirection);
         }
     });
 }

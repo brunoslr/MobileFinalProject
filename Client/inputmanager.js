@@ -108,3 +108,15 @@ InputManager.prototype.onKeyUp= function(event){
 	}
 };
 
+/*
+
+		<script src="libraries/three.min.js"></script>
+		<script src="libraries/PreBuilt/controls/FirstPersonControls.js"></script>
+		<script src="inputmanager.js"></script>
+		<script src="worldmanager.js"></script>
+		<script src="networkmanager.js"></script>
+		<script src="enemymanager.js"></script>
+		
+		<script src="fpsexample.js"></script>
+		*/
+
