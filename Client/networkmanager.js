@@ -120,7 +120,7 @@ function NetworkManager(){
         this.ballsArray.push(sphere);
         this.fVectors.push(direction);
         scene.add( sphere );
-		ballOwners.push( this.playerID );
+		//ballOwners.push( this.playerID );
 		this.bulletsShot++;
 		//console.log(this.bulletsShot);
 		//console.log(this.curPlayerID);
