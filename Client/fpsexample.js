@@ -40,23 +40,24 @@ var instructions = document.getElementById('instructions');
 
 	
 	
-    var ballMaterial = new THREE.MeshPhongMaterial({
-        wireframe: true,
-        color: 0xff0000
-    });
-    var ballGeometry = new THREE.SphereGeometry(1, 8, 6);
-    var shootDirection = new THREE.Vector3();
-    var projector = new THREE.Projector();
-    var balls = [];
-    var ballMeshes = [];
-	this.onload = function () {
-	var healthbar = document.getElementById('progress-bar');
+var ballMaterial = new THREE.MeshPhongMaterial({
+	wireframe: true,
+	color: 0xff0000
+});
+var ballGeometry = new THREE.SphereGeometry(1, 8, 6);
+var shootDirection = new THREE.Vector3();
+var projector = new THREE.Projector();
+var balls = [];
+var ballMeshes = [];
+this.onload = function () {
+var healthbar = document.getElementById('progress-bar');
 
     // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
     if (havePointerLock) {
+		console.log("HERE");
         var element = document.body;
         var pointerlockchange = function (event) {
             if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
@@ -89,7 +90,7 @@ var instructions = document.getElementById('instructions');
         instructions.addEventListener('click', function (event) {
             instructions.style.display = 'none';
             // Ask the browser to lock the pointer
-            element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+            //element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 
             if (/Firefox/i.test(navigator.userAgent)) {
                 var fullscreenchange = function (event) {
@@ -104,7 +105,7 @@ var instructions = document.getElementById('instructions');
                 element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
                 element.requestFullscreen();
             } else {
-                element.requestPointerLock();
+                //element.requestPointerLock();
             }
 
         }, false);
@@ -137,7 +138,7 @@ var instructions = document.getElementById('instructions');
 		controls.autoForward = false;
 
         player = controls.getObject();;
-                player.position.y = 10;
+        player.position.y = 10;
         scene.add(player);
         player2 = controls.getObject();;
         scene.add(player2);
@@ -155,30 +156,30 @@ var instructions = document.getElementById('instructions');
 		//enemies
         enemyManager.initEnemies(scene, enemies, loader);
 
-	var geometry = new THREE.BoxGeometry( 10, 20, 10 );
-	for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
+		var geometry = new THREE.BoxGeometry( 10, 20, 10 );
+		for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
 
-		var face = geometry.faces[ i ];
-		face.vertexColors[ 0 ] = new THREE.Color( 1,0,0 );
-		face.vertexColors[ 1 ] = new THREE.Color( 1,0,0);
-		face.vertexColors[ 2 ] = new THREE.Color( 1,0,0 );
+			var face = geometry.faces[ i ];
+			face.vertexColors[ 0 ] = new THREE.Color( 1,0,0 );
+			face.vertexColors[ 1 ] = new THREE.Color( 1,0,0);
+			face.vertexColors[ 2 ] = new THREE.Color( 1,0,0 );
 
-	}
+		}
 
-	for ( var i = 0; i < 0; i ++ ) {
+		for ( var i = 0; i < 0; i ++ ) {
 
-		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
+			var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
 
-		var mesh = new THREE.Mesh( geometry, material );
-		mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-		mesh.position.y=10;
-		mesh.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
-		scene.add( mesh );
+			var mesh = new THREE.Mesh( geometry, material );
+			mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
+			mesh.position.y=10;
+			mesh.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
+			scene.add( mesh );
 
-		material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+			material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
 
-		enemies.push( mesh );
-	}
+			enemies.push( mesh );
+		}
 		
         renderer = new THREE.WebGLRenderer();
         renderer.setClearColor(0xffffff);
@@ -208,7 +209,8 @@ var instructions = document.getElementById('instructions');
 
     function update()
     {
-        if (inputManager.controlsEnabled)
+        //if (inputManager.controlsEnabled)
+		if (true)
         {
 			
 			// update the player on the network
@@ -314,14 +316,15 @@ var instructions = document.getElementById('instructions');
 		
 		if(collided == false)
 		{
-                player.position.y = 10;
+            player.position.y = 10;
 			controls.update(dt, player);
-                player.position.y = 10;
-		} else {
-                player.position.y = 10;
+            player.position.y = 10;
+		} else 
+		{
+            player.position.y = 10;
 			console.log("collision");
 		}
-		///////////////////////////////////////////////////////////////////////////////////////////////////
+		///////// end collision detection //////////////////////////////////////////////////////////////////////////////////////////
 		
 	}
 	
@@ -542,3 +545,26 @@ var instructions = document.getElementById('instructions');
     });
 }
 
+/*
+
+		<script src="libraries/three.min.js"></script>
+		<script src="libraries/PreBuilt/controls/FirstPersonControls.js"></script>
+		<script src="inputmanager.js"></script>
+		<script src="worldmanager.js"></script>
+		<script src="enemymanager.js"></script>
+		<script src="networkmanager.js"></script>
+		<div id="blocker">
+			<div id="instructions">
+				<span style="font-size:40px">Click to play</span>
+				<br />
+				(W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
+			</div>
+		</div>
+		<div id="health">
+			<div id="percent">Health: <span id="p"></span></div>
+			<progress id="progress-bar" value="100" max="100"></progress>
+		</div>
+		<script src="fpsexample.js"></script>
+
+
+*/
