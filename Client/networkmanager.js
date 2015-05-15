@@ -8,12 +8,21 @@ function NetworkManager(){
 	this.exampleSocket = "";
 	this.state = 0;
 	this.controls = "";
-	this.playerID= -1;
-	this.addedBoxes= false;
-	this.otherPlayerData= new Array();
+	this.playerID = -1;
+	this.addedBoxes = false;
+	this.otherPlayerData = new Array();
+	this.ballsArray = [];
+	this.fVectors = []
+	this.shootVelo = 5;
+	this.bulletsShot = 0;
+	this.hit = false;
+	
 	this.update = function(controls){
-		//console.log(controls.getObject().x + " " + controls.getObject().y + " " + controls.getObject.z);
-		this.controls= controls;
+		this.controls = controls;
+		this.moveProjectiles();
+		this.playerBulletCollisionDetection();
+
+		
 		switch(this.state){
 			case 0://socket has not yet been created
 				this.exampleSocket =new WebSocket("ws://127.0.0.1:8080");
@@ -28,6 +37,7 @@ function NetworkManager(){
 				this.updateServer();
 			break;
 		}
+		
 	};
 	
 	this.socketOnOpen=function(event){
@@ -42,6 +52,7 @@ function NetworkManager(){
 				if(this.state ==2 ){
 					this.state= 3;
 					this.playerID= parseInt(splitString[1]);
+					//console.log(this.playerID)
 					this.addBoxes(event.data);
 				}
 			break;
@@ -56,7 +67,7 @@ function NetworkManager(){
 					//if the player is a new player, add the player
 					if(this.otherPlayerData[curPlayerID]==null){
 						this.addPlayer(curPlayerID,parseInt(splitString[i+1]),parseInt(splitString[i+2]),parseInt(splitString[i+3]));
-						console.log("playerAdded: " + curPlayerID);
+						//console.log("playerAdded: " + curPlayerID);
 					}
 					else{
 						this.otherPlayerData[curPlayerID].obj.position.x= parseInt(splitString[i+1]);
@@ -90,11 +101,12 @@ function NetworkManager(){
 			face.vertexColors[ 2 ] = new THREE.Color( 1,0,0 );
 
 		}
-		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
+		var material = new THREE.MeshBasicMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.position.x = newX;
 		mesh.position.y = newY;
 		mesh.position.z = newZ;
+		mesh.health = 100;
 		scene.add( mesh );
 		var newPlayer= new NetworkedPlayer(mesh,curPlayerID);
 		this.otherPlayerData[curPlayerID]=newPlayer;
@@ -105,9 +117,13 @@ function NetworkManager(){
 	this.spawnBullet = function(position, direction){
 		 var sphere = new THREE.Mesh( geometry, ballMaterial );
         sphere.position.set(position.x, position.y, position.z);
-        balls1.push(sphere);
-        fVectors.push(direction);
+        this.ballsArray.push(sphere);
+        this.fVectors.push(direction);
         scene.add( sphere );
+		ballOwners.push( this.playerID );
+		this.bulletsShot++;
+		//console.log(this.bulletsShot);
+		//console.log(this.curPlayerID);
 	};
 	
 	this.sendBullet = function(positionVector, velocityVector){
@@ -126,6 +142,30 @@ function NetworkManager(){
 		}
 	};
 	
+	
+    this.moveProjectiles = function()
+    {
+        for(var i=0; i<this.ballsArray.length; i++)
+		{
+			this.ballsArray[i].position.set(this.ballsArray[i].position.x + this.fVectors[i].x * this.shootVelo,
+			this.ballsArray[i].position.y + this.fVectors[i].y * this.shootVelo,
+			this.ballsArray[i].position.z + this.fVectors[i].z * this.shootVelo);
+			
+			if (this.ballsArray[i].position.distanceTo(this.controls.getObject().position) > 500 || this.ballsArray[i].position.y <= 1.5) //balls[i].radius)
+            {
+                scene.remove(this.ballsArray[i]);
+                this.ballsArray.splice(i, 1);
+                this.fVectors.splice(i,1);
+            }
+        }
+		
+		
+			
+            
+    }
+	
+	
+	
 	this.addBoxes= function(worldData){
 		var geometry = new THREE.BoxGeometry(20, 20, 20);
         for (var i = 0, l = geometry.faces.length; i < l; i++) {
@@ -139,7 +179,7 @@ function NetworkManager(){
 		//var halfExtents = new CANNON.Vec3(1, 1, 1);
 		//var boxShape = new CANNON.Box(halfExtents);
 		var splitString= worldData.split("\n");
-		console.log("s: " + splitString);
+		//console.log("s: " + splitString);
 		if(!this.addedBoxes){
 			this.addedBoxes=true;
 			if(splitString.length>1){
@@ -147,7 +187,7 @@ function NetworkManager(){
 					// TODO: Change material, for performance
 					var material = new THREE.MeshPhongMaterial({ specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors });
 					var mesh = new THREE.Mesh(geometry, material);
-					console.log("run");
+					//console.log("run");
 							
 					mesh.position.x = parseFloat(splitString[j]);
 					mesh.position.y = parseFloat(splitString[j+1]);
@@ -177,6 +217,25 @@ function NetworkManager(){
 					world.add(boxBody);
 					physicsObjects.push(boxBody);
 				}
+			}
+		}
+	}
+	
+	this.playerBulletCollisionDetection = function()
+	{
+		this.hit = false;
+        for(var i = 0; i < this.ballsArray.length; i++)
+		{
+			//console.log(this.otherPlayerData.length);
+			for(var j = 0; j < this.otherPlayerData.length; j++)
+			{
+				if(this.otherPlayerData[j] != null)
+				{
+					if (this.ballsArray[i].position.distanceTo(this.otherPlayerData[j].obj.position) < 10) {
+						this.otherPlayerData[j].obj.health--;
+					}
+				}
+				
 			}
 		}
 	}

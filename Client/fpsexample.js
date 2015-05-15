@@ -10,7 +10,8 @@ var player, player2;
 var shootVelo = 8.5;
 var objects = [];
 var enemies= [];
-var health = 100;
+var dt = 1/60;
+var bulletsShot = 0;
 
 //3d model loading
 var loader;
@@ -32,6 +33,7 @@ var ballMaterial = new THREE.MeshPhongMaterial({
 var projector = new THREE.Projector();
 var balls1 = [];
 var fVectors = [];
+var ballOwners = [];
 
 var blocker = document.getElementById('blocker');
 var instructions = document.getElementById('instructions');
@@ -47,7 +49,7 @@ var instructions = document.getElementById('instructions');
     var projector = new THREE.Projector();
     var balls = [];
     var ballMeshes = [];
-this.onload = function () {
+	this.onload = function () {
 	var healthbar = document.getElementById('progress-bar');
 
     // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
@@ -128,7 +130,11 @@ this.onload = function () {
 
         loader= new THREE.JSONLoader();
 
-        controls = new THREE.PointerLockControls(camera);
+        //controls = new THREE.PointerLockControls(camera);
+		controls = new THREE.FirstPersonControls(camera);
+		controls.movementSpeed = 25.0;
+		controls.lookSpeed = 10.0;
+		controls.autoForward = false;
 
         player = controls.getObject();;
         scene.add(player);
@@ -196,6 +202,10 @@ this.onload = function () {
         if (inputManager.controlsEnabled)
         {
 			networkManager.update(controls);
+
+			
+			controls.update(dt, player);
+			player.rotation = controls.object.rotation;
             
 			collisionDetectionAndMovement();
 			
@@ -207,8 +217,8 @@ this.onload = function () {
             raycaster.ray.origin.copy(player.position);	
             raycaster.ray.origin.y -= 10;
 
-            moveProjectiles();
-            bulletsHandle();
+            //moveProjectiles();
+            //bulletsHandle();
 
             enemyManager.moveEnemies(enemies, player);
         }
@@ -341,14 +351,26 @@ this.onload = function () {
     function bulletsHandle()
     {
         for (var i = 0; i < balls1.length; i++) {
-
+			
+		//console.log("player id = " + ballOwners[i]);
+		
             enemyManager.checkEnemyCollision(enemies, balls1[i], scene, score);
-
-            if (balls1[i].position.distanceTo(player.position) > 10000 || balls1[i].position.y <= 1.5) //balls[i].radius)
+			
+			//console.log(player.position);
+			//ballOwners[i] != networkmanager.playerID &&
+			/*
+			if (balls1[i].position.distanceTo(player.position) < 10) {
+				health--;
+				console.log(health);
+			}*/
+			
+			
+            if (balls1[i].position.distanceTo(player.position) > 500 || balls1[i].position.y <= 1.5) //balls[i].radius)
             {
                 scene.remove(balls1[i]);
                 balls1.splice(i, 1);
                 fVectors.splice(i,1);
+				ballOwners.splice(i,1);
             }
         }
 		score = enemies.length;
@@ -384,6 +406,8 @@ this.onload = function () {
 			getShootDir(shootDirection);
             networkManager.spawnBullet(player.position, shootDirection);
 			networkManager.sendBullet(player.position,shootDirection);
+			//networkManager.bulletsShot++;
+			//console.log(bulletsShot);
         }
     });
 }
