@@ -49,7 +49,6 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 	this.viewHalfX = 0;
 	this.viewHalfY = 0;
-	
 
 	if ( this.domElement !== document ) {
 
