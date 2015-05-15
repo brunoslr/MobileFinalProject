@@ -1,5 +1,4 @@
 var debugBuild = true;
-//this.onload = function () {
 var score = 0;
 
 var shootVelo = 55;
@@ -12,7 +11,6 @@ var objects = [];
 var enemies= [];
 var dt = 1/60;
 var bulletsShot = 0;
-var dt = 1/60;
 var playerBox1;
 var direction;
 
@@ -173,7 +171,6 @@ var instructions = document.getElementById('instructions');
 
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-		// mesh.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
 		mesh.position.y=10;
 		mesh.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
 		scene.add( mesh );
@@ -198,7 +195,6 @@ var instructions = document.getElementById('instructions');
 		playerBox1.receiveShadow = false;
 		playerBox1.castShadow = false;
 		playerBox1.position = camera.position;
-		//scene.add(playerBox1);
 		direction = new THREE.Vector3(0, 0, 0);
     }
 
@@ -214,12 +210,15 @@ var instructions = document.getElementById('instructions');
     {
         if (inputManager.controlsEnabled)
         {
+			
+			// update the player on the network
 			networkManager.update(controls);
 			
-			//controls.update(dt, player);
+			// update the player's and collision box's rotation to the camera's rotation
 			player.rotation = controls.object.rotation;
 			playerBox1.rotation = controls.object.rotation;
 			
+			// update the collision box's rotation and position to the player's rotation and position
 			playerBox1.rotation.x = player.rotation.x;
 			playerBox1.rotation.y = player.rotation.y;
 			playerBox1.rotation.z = player.rotation.z;
@@ -227,31 +226,13 @@ var instructions = document.getElementById('instructions');
 			playerBox1.position.x = player.position.x;
 			playerBox1.position.y = player.position.y;
 			playerBox1.position.z = player.position.z;
-			//console.log("playerbox1 position = " + playerBox1.position.x + " 	player position = " + player.position.x);
+			
+			// detect collsions, move bullets, bullet collision and move enemies functions
 			collisionDetect();
-			//checkCollisions();
-            
-			//collisionDetectionAndMovement();
-			//console.log("mouseX = " + controls.mouseX);
-            
-			//collisionDetectionAndMovement();
-			//console.log(player.position);
-			//console.log(player.rotation);
-			
-			/*
-            if (player.position.y < 10) {
-                velocity.y = 0;
-                player.position.y = 10;
-                inputManager.canJump = true;
-            }
-            raycaster.ray.origin.copy(player.position);	
-            raycaster.ray.origin.y -= 10;
-			*/
-			
             moveProjectiles();
             bulletsHandle();
-
             enemyManager.moveEnemies(enemies, player);
+			
         }
     }
 	
@@ -266,7 +247,7 @@ var instructions = document.getElementById('instructions');
 		var tempPerson = new THREE.Mesh(tempPersonG);
 		tempPerson.position.set(playerBox1.position.x, playerBox1.position.y, playerBox1.position.z);
 		tempPerson.rotation.set(oldrotation.x, oldrotation.y, oldrotation.z);
-		//this.scene.add(tempPerson);
+		
 		var collided = false;
 		var typeHit = 0;
 		// move the cube up,left,down,right
@@ -292,50 +273,37 @@ var instructions = document.getElementById('instructions');
 		}
 		
 		
-		//console.log(typeHit);
 		var originPoint = tempPerson.position.clone();
-		//var originPoint = tempPerson.position.clone();
-		//clearText(originPoint);
-		
 		// check for collisions
-		//for (var vertexIndex = 0; vertexIndex < tempPerson.geometry.vertices.length; vertexIndex++)
 		for (var vertexIndex = 0; vertexIndex < tempPerson.geometry.vertices.length; vertexIndex++)
 		{		
 			var localVertex = tempPerson.geometry.vertices[vertexIndex].clone();
 			var globalVertex = localVertex.applyMatrix4( tempPerson.matrix );
 			var directionVector = globalVertex.sub( tempPerson.position );
 			
-			//var localVertex = tempPerson.geometry.vertices[vertexIndex].clone();
-			//var globalVertex = localVertex.applyMatrix4( tempPerson.matrix );
-			//var directionVector = globalVertex.sub( tempPerson.position );
 			
 			var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
 			var collisionResults = ray.intersectObjects( objects );
-			//console.log(collisionResults.length);
-			if ( collisionResults.length > 0 && collisionResults[0].distance < 5 ) 
+			if ( collisionResults.length > 0 && collisionResults[0].distance < 2 ) 
 			{
 			// There was a collision so you must undo the movement
 				if(typeHit == 1)
 				{
-					//this.person.position.x += this.movementSpeed;
 					tempPerson.translateX( -controls.movementSpeed - 1.0);
 					collided = true;
 				}
 				else if(this.typeHit == 2)
 				{
-					//this.person.position.x -= this.movementSpeed;
 					tempPerson.translateX( controls.movementSpeed + 1.0);
 					collided = true;
 				}
 				else if(typeHit == 3)
 				{
-					//this.person.position.z += this.movementSpeed;
 					tempPerson.translateZ( -controls.movementSpeed - 1.0);
 					collided = true;
 				}
 				else if(typeHit == 4)
 				{
-					//this.person.position.z -= this.movementSpeed;
 					tempPerson.translateZ( controls.movementSpeed + 1.0);
 					collided = true;
 				}
@@ -526,17 +494,9 @@ var instructions = document.getElementById('instructions');
     {
         for (var i = 0; i < balls1.length; i++) {
 			
-		//console.log("player id = " + ballOwners[i]);
 		
             enemyManager.checkEnemyCollision(enemies, balls1[i], scene, score);
 			
-			//console.log(player.position);
-			//ballOwners[i] != networkmanager.playerID &&
-			/*
-			if (balls1[i].position.distanceTo(player.position) < 10) {
-				health--;
-				console.log(health);
-			}*/
 			
 			
             if (balls1[i].position.distanceTo(player.position) > 500 || balls1[i].position.y <= 1.5) //balls[i].radius)
@@ -544,7 +504,6 @@ var instructions = document.getElementById('instructions');
                 scene.remove(balls1[i]);
                 balls1.splice(i, 1);
                 fVectors.splice(i,1);
-				//ballOwners.splice(i,1);
             }
         }
 		score = enemies.length;
@@ -561,7 +520,6 @@ var instructions = document.getElementById('instructions');
         var vector = targetVec;
         targetVec.set(0, 0, 1);
 		vector.unproject(camera);
-        //projector.unprojectVector(vector, camera);
         var ray = new THREE.Ray(player.position, vector.sub(player.position).normalize());
         targetVec.copy(ray.direction);
     }
@@ -580,8 +538,6 @@ var instructions = document.getElementById('instructions');
 			getShootDir(shootDirection);
             networkManager.spawnBullet(player.position, shootDirection);
 			networkManager.sendBullet(player.position,shootDirection);
-			//networkManager.bulletsShot++;
-			//console.log(bulletsShot);
         }
     });
 }
