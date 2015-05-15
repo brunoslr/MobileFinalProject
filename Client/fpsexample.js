@@ -139,6 +139,7 @@ var instructions = document.getElementById('instructions');
 		controls.autoForward = false;
 
         player = controls.getObject();;
+                player.position.y = 10;
         scene.add(player);
         player2 = controls.getObject();;
         scene.add(player2);
@@ -345,8 +346,11 @@ var instructions = document.getElementById('instructions');
 		
 		if(collided == false)
 		{
+                player.position.y = 10;
 			controls.update(dt, player);
+                player.position.y = 10;
 		} else {
+                player.position.y = 10;
 			console.log("collision");
 		}
 		///////////////////////////////////////////////////////////////////////////////////////////////////
