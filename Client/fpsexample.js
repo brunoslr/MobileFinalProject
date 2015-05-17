@@ -137,10 +137,10 @@ var healthbar = document.getElementById('progress-bar');
 		controls.lookSpeed = 10.0;
 		controls.autoForward = false;
 
-        player = controls.getObject();;
+        player = controls.getObject();
         player.position.y = 10;
         scene.add(player);
-        player2 = controls.getObject();;
+        player2 = controls.getObject();
         scene.add(player2);
 		networkManager = new NetworkManager();
 
@@ -190,7 +190,7 @@ var healthbar = document.getElementById('progress-bar');
         window.addEventListener('resize', onWindowResize, false);  
 
 		// set up the cube that the collision box will rest on
-		var cubeGeometry = new THREE.CubeGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
+		var cubeGeometry = new THREE.BoxGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
 		var cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
 		playerBox1 = new THREE.Mesh(cubeGeometry,cubeMaterial);
 		playerBox1.receiveShadow = false;
@@ -245,7 +245,7 @@ var healthbar = document.getElementById('progress-bar');
 		// collision detection and prevention
 		// coded by Zach Whitman 
 		var oldrotation = playerBox1.rotation;
-		var tempPersonG = new THREE.CubeGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
+		var tempPersonG = new THREE.BoxGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
 		var tempPerson = new THREE.Mesh(tempPersonG);
 		tempPerson.position.set(playerBox1.position.x, playerBox1.position.y, playerBox1.position.z);
 		tempPerson.rotation.set(oldrotation.x, oldrotation.y, oldrotation.z);
@@ -539,7 +539,6 @@ var healthbar = document.getElementById('progress-bar');
         {
 			var shootDirection = new THREE.Vector3();
 			getShootDir(shootDirection);
-            networkManager.spawnBullet(player.position, shootDirection);
 			networkManager.sendBullet(player.position,shootDirection);
         }
     });

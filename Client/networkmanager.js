@@ -77,8 +77,10 @@ function NetworkManager(){
 				}
 			break;
 			case "bullet spawn":
-				this.spawnBullet(new THREE.Vector3(parseFloat(splitString[2]),parseFloat(splitString[3]),parseFloat(splitString[4])),
-							new THREE.Vector3(parseFloat(splitString[5]),parseFloat(splitString[6]),parseFloat(splitString[7])));
+				this.spawnBullet(new THREE.Vector3(parseFloat(splitString[3]),parseFloat(splitString[4]),parseFloat(splitString[5])),
+							new THREE.Vector3(parseFloat(splitString[6]),parseFloat(splitString[7]),parseFloat(splitString[8])), parseInt(splitString[1]), parseInt(splitString[2]));
+			case "bullet hit player confirmed":
+				this.resolveBulletCollision(parseInt(splitString[1]),parseInt(splitString[2]));
 			break;
 		}
 	};
@@ -114,9 +116,11 @@ function NetworkManager(){
 		//objects.push( mesh );
 	};
 	
-	this.spawnBullet = function(position, direction){
+	this.spawnBullet = function(position, direction, bulletID, bulletPlayerID){
 		 var sphere = new THREE.Mesh( geometry, ballMaterial );
         sphere.position.set(position.x, position.y, position.z);
+		sphere.bulletPlayerID=bulletPlayerID;
+		sphere.bulletID= bulletID;
         this.ballsArray.push(sphere);
         this.fVectors.push(direction);
         scene.add( sphere );
@@ -157,12 +161,28 @@ function NetworkManager(){
                 this.ballsArray.splice(i, 1);
                 this.fVectors.splice(i,1);
             }
-        }
-		
-		
-			
-            
+        }        
     }
+	
+	this.sendHit= function(hitPlayerID, bulletID){
+		var sendHitString= "bullet hit player\n";
+		sendHitString+=hitPlayerID + "\n";
+		sendHitString+=bulletID;
+		this.send(sendHitString);
+	};
+	
+	this.resolveBulletCollision= function (hitPlayerID,bulletID){
+		if(this.playerID==hitPlayerID){
+			console.log("DECREMENT HEALTH");
+		}
+		for(var i = 0; i < this.ballsArray.length; i++)
+		{
+			if(this.ballsArray[i].bulletID==bulletID){
+				scene.removeObject(this.ballsArray[i].obj);
+				this.ballsArray.splice(i,1);
+			}
+		}
+	};
 	
 	
 	
@@ -187,7 +207,6 @@ function NetworkManager(){
 					// TODO: Change material, for performance
 					var material = new THREE.MeshPhongMaterial({ specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors });
 					var mesh = new THREE.Mesh(geometry, material);
-					//console.log("run");
 							
 					mesh.position.x = parseFloat(splitString[j]);
 					mesh.position.y = parseFloat(splitString[j+1]);
@@ -226,13 +245,15 @@ function NetworkManager(){
 		this.hit = false;
         for(var i = 0; i < this.ballsArray.length; i++)
 		{
-			//console.log(this.otherPlayerData.length);
+			var currentBall=this.ballsArray[i];
 			for(var j = 0; j < this.otherPlayerData.length; j++)
 			{
 				if(this.otherPlayerData[j] != null)
 				{
-					if (this.ballsArray[i].position.distanceTo(this.otherPlayerData[j].obj.position) < 10) {
-						this.otherPlayerData[j].obj.health--;
+					var currentPlayer= this.otherPlayerData[j];
+					if (currentBall.position.distanceTo(currentPlayer.obj.position) < 10) {
+						if(currentPlayer.ID!=currentBall.bulletPlayerID)
+							this.sendHit(currentPlayer.ID, currentBall.bulletPlayerID);
 					}
 				}
 				

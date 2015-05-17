@@ -17,6 +17,7 @@ function InputManager() {
 	window.addEventListener('onmozorientation', this, false); //For Moz
 	this.accLeft = false;
 	this.accRight = false;
+	this.lockInput= false;
 }
 
 InputManager.prototype.handleEvent= function(e){
