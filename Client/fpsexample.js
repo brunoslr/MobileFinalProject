@@ -234,11 +234,12 @@ var healthbar = document.getElementById('progress-bar');
 
     function update()
     {
-        t.innerText = "";
+        var t = document.getElementById('console');
+        t.innerText = '';
         //if (inputManager.controlsEnabled)
 		if (true)
         {
-			
+		    collisionDetectionAndMovement();
 			// update the player on the network
 			networkManager.update(controls);
 			
@@ -260,7 +261,6 @@ var healthbar = document.getElementById('progress-bar');
             moveProjectiles();
             bulletsHandle();
             enemyManager.moveEnemies(enemies, player);
-            collisionDetectionAndMovement();
         }
     }
 	
@@ -530,11 +530,7 @@ var healthbar = document.getElementById('progress-bar');
     function bulletsHandle()
     {
         for (var i = 0; i < balls1.length; i++) {
-			
-		
             enemyManager.checkEnemyCollision(enemies, balls1[i], scene, score);
-			
-			
 			
             if (balls1[i].position.distanceTo(player.position) > 500 || balls1[i].position.y <= 1.5) //balls[i].radius)
             {
@@ -569,6 +565,12 @@ var healthbar = document.getElementById('progress-bar');
                 balls1[i].position.z + fVectors[i].z * shootVelo);
         }
     }
+
+    window.addEventListener("ontouchend", function (e) {
+        var shootDirection = new THREE.Vector3();
+        getShootDir(shootDirection);
+        networkManager.sendBullet(player.position, shootDirection);
+    });
 	window.addEventListener("click", function (e) {
         {
 			var shootDirection = new THREE.Vector3();

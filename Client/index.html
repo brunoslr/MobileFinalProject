@@ -38,72 +38,75 @@
                     var z = event.accelerationIncludingGravity.z;
                     var y = event.accelerationIncludingGravity.y;
 
-                    if (x < -0.5) {
-                        inputManager.moveForward = true;
-                    }
-                    if (x > 0.5) {
-                        inputManager.moveBackward = true;
-                    }
-                    if (x > 1.5 || x < -1.5) {
-                        inputManager.isSprinting = true;
-                    }
-                    else {
-                    }
-
-                    if (z > 11 || z < 9) {
-                        if (inputManager.canJump == true) {
-                            inputManager.moveJump = true;
+                    if (x != null && y != null && z != null) {
+                        if (x < -0.5) {
+                            inputManager.moveForward = true;
+                        }
+                        if (x > 0.5) {
+                            inputManager.moveBackward = true;
+                        }
+                        if (x > 1.5 || x < -1.5) {
+                            inputManager.isSprinting = true;
                         }
                         else {
-                            inputManager.canJump = false;
-                        }
-                    }
-
-                    if (y > 0.5) {
-                        inputManager.moveRight = true;
-                    }
-                    else
-                        if (y < -0.5) {
-                            inputManager.moveLeft = true;
                         }
 
-                    inputManager.acceleration = new THREE.Vector3(x, y, z);
+                        if (z > 11 || z < 9) {
+                            if (inputManager.canJump == true) {
+                                inputManager.moveJump = true;
+                            }
+                            else {
+                                inputManager.canJump = false;
+                            }
+                        }
+
+                        if (y > 0.5) {
+                            inputManager.moveRight = true;
+                        }
+                        else
+                            if (y < -0.5) {
+                                inputManager.moveLeft = true;
+                            }
+
+                        inputManager.acceleration = new THREE.Vector3(x, y, z);
+                    }
                 }
                 else if (event.type === 'deviceorientation') {
                     if (x == null) x = event.alpha;
                     if (y == null) y = event.beta;
                     if (z == null) z = event.gamma;
-
-                    if (y < -95) {
-                        inputManager.moveForward = true;
-                    }
-                    if (y > -85) {
-                        inputManager.moveBackward = true;
-                    }
-                    if (x > 1.5 || x < -1.5) {
-                        inputManager.isSprinting = true;
-                    }
-                    else {
-                    }
-
-                    if (z > 11 || z < 9) {
-                        if (inputManager.canJump == true) {
-                            inputManager.moveJump = true;
+                    if (x != null && y != null && z != null) {
+                        if (y < -95) {
+                            inputManager.moveForward = true;
+                        }
+                        if (y > -85) {
+                            inputManager.moveBackward = true;
+                        }
+                        if (x > 1.5 || x < -1.5) {
+                            inputManager.isSprinting = true;
                         }
                         else {
-                            inputManager.canJump = false;
-                        }
-                    }
-
-                    if ( x < -20 ) {
-                        inputManager.moveRight = true;
-                    }
-                    else
-                        if (x > 20 ) {
-                            inputManager.moveLeft = true;
                         }
 
-                    inputManager.acceleration = new THREE.Vector3(x, y, z);
+                        if (z > 11 || z < 9) {
+                            if (inputManager.canJump == true) {
+                                inputManager.moveJump = true;
+                            }
+                            else {
+                                inputManager.canJump = false;
+                            }
+                        }
+
+                        if (x < -20) {
+                            inputManager.moveRight = true;
+                        }
+                        else
+                            if (x > 20) {
+                                inputManager.moveLeft = true;
+                            }
+
+                        inputManager.acceleration = new THREE.Vector3(x, y, z);
+                    }
                 }
                 var t = document.getElementById('console');
                 t.innerText = 'logging x: ' + x + ' y: ' + y + ' z: ' + z;

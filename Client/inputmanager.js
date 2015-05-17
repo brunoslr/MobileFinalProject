@@ -11,15 +11,13 @@ function InputManager() {
 	this.acceleration = new THREE.Vector3();
 	window.addEventListener( 'keydown', this, false );
 	window.addEventListener('keyup', this, false);
-<<<<<<< HEAD
-=======
+
 	window.addEventListener('ondevicemotion', this, false); //Usually words with safari and opera
 	window.addEventListener('ondeviceorientation', this, false); //For chrome
 	window.addEventListener('onmozorientation', this, false); //For Moz
 	this.accLeft = false;
 	this.accRight = false;
 	this.lockInput= false;
->>>>>>> fb8a6f12a305f416453b74c2428fa0075c8adece
 }
 
 InputManager.prototype.handleEvent = function(e){
