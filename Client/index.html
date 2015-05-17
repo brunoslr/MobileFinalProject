@@ -2,27 +2,149 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<title>Three.JS FPS</title>
 		<link rel="stylesheet" href="fpsexample.css" type="text/css" media="screen">
 	</head>
-	<body>
-		<script src="libraries/three.min.js"></script>
+	<body style="">
+        <script type="text/javascript" src="libraries/three.js"></script>
 		<script src="libraries/PreBuilt/controls/FirstPersonControls.js"></script>
 		<script src="inputmanager.js"></script>
 		<script src="worldmanager.js"></script>
 		<script src="enemymanager.js"></script>
 		<script src="networkmanager.js"></script>
-		<div id="blocker">
+		<!--<div id="blocker">
 			<div id="instructions">
 				<span style="font-size:40px">Click to play</span>
 				<br />
 				(W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
 			</div>
-		</div>
-		<div id="health">
+		</div>-->
+		<div id="health">         
 			<div id="percent">Health: <span id="p"></span></div>
 			<progress id="progress-bar" value="100" max="100"></progress>
 		</div>
+        <label id="console">blah</label>
+        <br />
+        <label id="console2">blah</label>
 		<script src="fpsexample.js"></script>
+        <script>
+            //acc input
+            this.ondevicemotion = accleration;
+            this.ondeviceorientation = accleration;
+            function accleration() {
+                if (event.type === 'devicemotion') {
+                    var x = event.accelerationIncludingGravity.x;
+                    var z = event.accelerationIncludingGravity.z;
+                    var y = event.accelerationIncludingGravity.y;
+
+                    if (x < -0.5) {
+                        inputManager.moveForward = true;
+                    }
+                    if (x > 0.5) {
+                        inputManager.moveBackward = true;
+                    }
+                    if (x > 1.5 || x < -1.5) {
+                        inputManager.isSprinting = true;
+                    }
+                    else {
+                    }
+
+                    if (z > 11 || z < 9) {
+                        if (inputManager.canJump == true) {
+                            inputManager.moveJump = true;
+                        }
+                        else {
+                            inputManager.canJump = false;
+                        }
+                    }
+
+                    if (y > 0.5) {
+                        inputManager.moveRight = true;
+                    }
+                    else
+                        if (y < -0.5) {
+                            inputManager.moveLeft = true;
+                        }
+
+                    inputManager.acceleration = new THREE.Vector3(x, y, z);
+                }
+                else if (event.type === 'deviceorientation') {
+                    if (x == null) x = event.alpha;
+                    if (y == null) y = event.beta;
+                    if (z == null) z = event.gamma;
+
+                    if (y < -95) {
+                        inputManager.moveForward = true;
+                    }
+                    if (y > -85) {
+                        inputManager.moveBackward = true;
+                    }
+                    if (x > 1.5 || x < -1.5) {
+                        inputManager.isSprinting = true;
+                    }
+                    else {
+                    }
+
+                    if (z > 11 || z < 9) {
+                        if (inputManager.canJump == true) {
+                            inputManager.moveJump = true;
+                        }
+                        else {
+                            inputManager.canJump = false;
+                        }
+                    }
+
+                    if ( x < -20 ) {
+                        inputManager.moveRight = true;
+                    }
+                    else
+                        if (x > 20 ) {
+                            inputManager.moveLeft = true;
+                        }
+
+                    inputManager.acceleration = new THREE.Vector3(x, y, z);
+                }
+                var t = document.getElementById('console');
+                t.innerText = 'logging x: ' + x + ' y: ' + y + ' z: ' + z;
+            }
+
+            this.addEventListener("touchstart", touchStart, false);
+            this.addEventListener("touchmove", touchMove, false);
+
+            var start = { x: 0, y: 0 };
+
+            function touchStart(e) {
+
+                start.x = event.touches[0].pageX;
+                start.y = event.touches[0].pageY;
+            }
+
+            function touchMove(e) {
+
+                offset = {};
+
+                offset.x = start.x - event.touches[0].pageX;
+                offset.y = start.y - event.touches[0].pageY;
+
+                var t = document.getElementById('console2');
+                t.innerText = offset.x + " " + offset.y;
+
+                camera.rotation.x += degInRad(offset.x);
+                camera.rotation.y += degInRad(offset.y);
+
+                renderer.render(scene, camera);
+                console.log(camera.rotation.x);
+                console.log(camera.rotation.y);
+
+                return offset;
+
+            }
+
+            function degInRad(w) {
+                return w * Math.PI / 180;
+            }
+
+        </script>
 	</body>
 </html>

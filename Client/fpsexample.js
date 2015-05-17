@@ -35,8 +35,8 @@ var projector = new THREE.Projector();
 var balls1 = [];
 var fVectors = [];
 
-var blocker = document.getElementById('blocker');
-var instructions = document.getElementById('instructions');
+// var blocker = document.getElementById('//blocker');
+// var instructions = document.getElementById('// instructions');
 
 	
 	
@@ -57,25 +57,25 @@ var healthbar = document.getElementById('progress-bar');
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
     if (havePointerLock) {
-		console.log("HERE");
+		// console.log("HERE");
         var element = document.body;
         var pointerlockchange = function (event) {
             if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
                 inputManager.controlsEnabled = true;
                 controls.enabled = true;
-                blocker.style.display = 'none';
+                //blocker.style.display = 'none';
 
             }
             else {
-                blocker.style.display = '-webkit-box';
-                blocker.style.display = '-moz-box';
-                blocker.style.display = 'box';
-                instructions.style.display = '';
+                //blocker.style.display = '-webkit-box';
+                //blocker.style.display = '-moz-box';
+                //blocker.style.display = 'box';
+                // instructions.style.display = '';
             }
         }
 
         var pointerlockerror = function (event) {
-            // instructions.style.display = '';
+            // // instructions.style.display = '';
         }
 
         // Hook pointer lock state change events
@@ -87,37 +87,37 @@ var healthbar = document.getElementById('progress-bar');
         document.addEventListener('mozpointerlockerror', pointerlockerror, false);
         document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
 
-        instructions.addEventListener('click', function (event) {
-            instructions.style.display = 'none';
-            // Ask the browser to lock the pointer
-            //element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+        // instructions.addEventListener('click', function (event) {
+        //    // instructions.style.display = 'none';
+        //    // Ask the browser to lock the pointer
+        //    //element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 
-            if (/Firefox/i.test(navigator.userAgent)) {
-                var fullscreenchange = function (event) {
-                    if (document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element) {
-                        document.removeEventListener('fullscreenchange', fullscreenchange);
-                        document.removeEventListener('mozfullscreenchange', fullscreenchange);
-                        element.requestPointerLock();
-                    }
-                }
-                document.addEventListener('fullscreenchange', fullscreenchange, false);
-                document.addEventListener('mozfullscreenchange', fullscreenchange, false);
-                element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
-                element.requestFullscreen();
-            } else {
-                //element.requestPointerLock();
-            }
+        //    if (/Firefox/i.test(navigator.userAgent)) {
+        //        var fullscreenchange = function (event) {
+        //            if (document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element) {
+        //                document.removeEventListener('fullscreenchange', fullscreenchange);
+        //                document.removeEventListener('mozfullscreenchange', fullscreenchange);
+        //                element.requestPointerLock();
+        //            }
+        //        }
+        //        document.addEventListener('fullscreenchange', fullscreenchange, false);
+        //        document.addEventListener('mozfullscreenchange', fullscreenchange, false);
+        //        element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+        //        element.requestFullscreen();
+        //    } else {
+        //        //element.requestPointerLock();
+        //    }
 
-        }, false);
+        //}, false);
 
     } else {
-        //instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
+        //// instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
     }
     init();
     update();
     draw();
 
-    var prevTime = performance.now();
+    var prevTime = new Date().getTime();
     var velocity = new THREE.Vector3();
 
     function init()
@@ -128,6 +128,31 @@ var healthbar = document.getElementById('progress-bar');
         scene.fog = new THREE.Fog(0xffffff, 0, 750);
 
         worldManager.addLight(scene);
+
+        //skybox stuff
+        var urlPrefix = "Assets/skybox/";
+        var urls = [urlPrefix + 'negx.PNG', urlPrefix + 'posx.PNG',
+            urlPrefix + 'posy.PNG', urlPrefix + 'negy.PNG',
+            urlPrefix + 'posz.PNG', urlPrefix + 'negz.PNG'];
+        var cubemap = THREE.ImageUtils.loadTextureCube(urls); // load textures
+        cubemap.format = THREE.RGBFormat;
+        var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
+        shader.uniforms['tCube'].value = cubemap; // apply textures to shader
+        var skyBoxMaterial = new THREE.ShaderMaterial({
+            fragmentShader:         shader.fragmentShader,
+            vertexShader:           shader.vertexShader,
+            uniforms:               shader.uniforms,
+            depthWrite:             false,
+            side:                   THREE.BackSide
+        });
+        var skybox = new THREE.Mesh(
+              new THREE.CubeGeometry(1000000, 1000000, 1000000),
+              skyBoxMaterial
+            );
+        scene.add(skybox);
+        
+        // skybox end
+
 
         loader= new THREE.JSONLoader();
 
@@ -190,7 +215,7 @@ var healthbar = document.getElementById('progress-bar');
         window.addEventListener('resize', onWindowResize, false);  
 
 		// set up the cube that the collision box will rest on
-		var cubeGeometry = new THREE.CubeGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
+		var cubeGeometry = new THREE.BoxGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
 		var cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
 		playerBox1 = new THREE.Mesh(cubeGeometry,cubeMaterial);
 		playerBox1.receiveShadow = false;
@@ -209,6 +234,7 @@ var healthbar = document.getElementById('progress-bar');
 
     function update()
     {
+        t.innerText = "";
         //if (inputManager.controlsEnabled)
 		if (true)
         {
@@ -234,7 +260,7 @@ var healthbar = document.getElementById('progress-bar');
             moveProjectiles();
             bulletsHandle();
             enemyManager.moveEnemies(enemies, player);
-			
+            collisionDetectionAndMovement();
         }
     }
 	
@@ -245,7 +271,7 @@ var healthbar = document.getElementById('progress-bar');
 		// collision detection and prevention
 		// coded by Zach Whitman 
 		var oldrotation = playerBox1.rotation;
-		var tempPersonG = new THREE.CubeGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
+		var tempPersonG = new THREE.BoxGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
 		var tempPerson = new THREE.Mesh(tempPersonG);
 		tempPerson.position.set(playerBox1.position.x, playerBox1.position.y, playerBox1.position.z);
 		tempPerson.rotation.set(oldrotation.x, oldrotation.y, oldrotation.z);
@@ -377,119 +403,127 @@ var healthbar = document.getElementById('progress-bar');
 		
 		
 		// Set the player's velocity
-		var time = performance.now();
-		var delta = (time - prevTime) / 1000;
-		velocity.x -= velocity.x * 10.0 * delta;
-		velocity.z -= velocity.z * 10.0 * delta;
-		velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-		
-		// check if jumping
-		if (inputManager.moveJump) {
-			velocity.y += 350;
-			inputManager.moveJump = false;
-		}
-		
-		// check about if the player is moving 
-		if (inputManager.moveForward) velocity.z -= 400.0 * delta;
-		if (inputManager.moveBackward) velocity.z += 400.0 * delta;
-		if (inputManager.moveLeft) velocity.x -= 400.0 * delta;
-		if (inputManager.moveRight) velocity.x += 400.0 * delta;
-		
-		// move the player, preemptively
-		player.translateX(velocity.x * delta);
-		player.translateY(velocity.y * delta);
-		player.translateZ(velocity.z * delta);
-		
-		// Create a new matrix and vector
-		var matrix = new THREE.Matrix4();
-		matrix.extractRotation( player2.matrix );
-		var direction = new THREE.Vector3( 0, 0, -1 );  // Forward
-		direction = direction.applyMatrix4(matrix);
-		
-		// raycast from the player's temp posistion in the direction they are facing
-		var raycaster = new THREE.Raycaster(player2.position, direction);
-		raycaster.intersectObjects(objects);
-		var intersections = raycaster.intersectObjects(objects);
-		var isColliding = false;
-		for(var i = 0; i < intersections.length; i++)
-		{
-			if(intersections[i].distance <= 2 )
-			{
-				isColliding = true;
-			}
-		}
-		
-		
-		// Create a new matrix and vector
-		var matrix2 = new THREE.Matrix4();
-		matrix2.extractRotation( player2.matrix );
-		var direction2 = new THREE.Vector3( 0, 0, 1 ); // Backward
-		direction2 = direction2.applyMatrix4( matrix2 );
-		
-		// raycast from the player's temp posistion in the direction they are facing
-		var raycaster2 = new THREE.Raycaster(player2.position, direction2);
-		raycaster2.intersectObjects(objects);
-		var intersections2 = raycaster2.intersectObjects(objects);
-		for(var i = 0; i < intersections2.length; i++)
-		{
-			if(intersections2[i].distance <= 2 )
-			{
-				isColliding = true;
-			}
-		}
-		
-		
-		// Create a new matrix and vector
-		var matrix3 = new THREE.Matrix4();
-		matrix3.extractRotation( player2.matrix );
-		var direction3 = new THREE.Vector3( 1, 0, 0 ); // Left?
-		direction3 = direction3.applyMatrix4( matrix3 );
-		
-		// raycast from the player's temp posistion in the direction they are facing
-		var raycaster3 = new THREE.Raycaster(player2.position, direction3);
-		raycaster3.intersectObjects(objects);
-		var intersections3 = raycaster3.intersectObjects(objects);
-		for(var i = 0; i < intersections3.length; i++)
-		{
-			if(intersections3[i].distance <= 2 )
-			{
-				isColliding = true;
-			}
-		}
-		
-		
-		// Create a new matrix and vector
-		var matrix4 = new THREE.Matrix4();
-		matrix4.extractRotation( player2.matrix );
-		var direction4 = new THREE.Vector3( -1, 0, 0 ); // Right?
-		direction4 = direction4.applyMatrix4( matrix4 );
-		
-		// raycast from the player's temp posistion in the direction they are facing
-		var raycaster4 = new THREE.Raycaster(player2.position, direction4);
-		raycaster4.intersectObjects(objects);
-		var intersections4 = raycaster4.intersectObjects(objects);
-		for(var i = 0; i < intersections4.length; i++)
-		{
-			if(intersections4[i].distance <= 2 )
-			{
-				isColliding = true;
-			}
-		}
-		
-		// if the player is colliding then move them back/prevent them
-		if(isColliding == true)
-		{
-			player.translateX(-velocity.x * delta);
-			player.translateY(velocity.y * delta);
-			player.translateZ(-velocity.z * delta);
-		}
-		else
-		{
-			// do nothing
-		}
-		
+	    var time = new Date().getTime();
+	    var delta = (time - prevTime) / 1000;
+	    if (!isNaN(delta)) {
+	        velocity.x -= velocity.x * 10.0 * delta;
+	        velocity.z -= velocity.z * 10.0 * delta;
+	        velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
-		prevTime = time;
+	        // check if jumping
+	        if (inputManager.moveJump) {
+	            velocity.y += 350;
+	            inputManager.moveJump = false;
+	        }
+
+	        // check about if the player is moving 
+	        if (inputManager.moveForward) {
+	            velocity.z -= 400.0 * delta;
+	            var t = document.getElementById('console');
+	            t.innerText += "moved forward";
+	        }
+	        if (inputManager.moveBackward) {
+	            velocity.z += 400.0 * delta;
+	            var t = document.getElementById('console');
+	            t.innerText += "moveBackward moveBackward";
+	        }
+	        if (inputManager.moveLeft) {
+	            velocity.x -= 400.0 * delta;
+	            var t = document.getElementById('console');
+	            t.innerText += "moveLeft moveLeft";
+	        }
+	        if (inputManager.moveRight) {
+	            velocity.x += 400.0 * delta;
+	            var t = document.getElementById('console');
+	            t.innerText += "movedRight moveRight";
+	        }
+
+	        // move the player, preemptively
+	        player.translateX(velocity.x * delta);
+	        player.translateY(velocity.y * delta);
+	        player.translateZ(velocity.z * delta);
+
+	        // Create a new matrix and vector
+	        var matrix = new THREE.Matrix4();
+	        matrix.extractRotation(player2.matrix);
+	        var direction = new THREE.Vector3(0, 0, -1);  // Forward
+	        direction = direction.applyMatrix4(matrix);
+
+	        // raycast from the player's temp posistion in the direction they are facing
+	        var raycaster = new THREE.Raycaster(player2.position, direction);
+	        raycaster.intersectObjects(objects);
+	        var intersections = raycaster.intersectObjects(objects);
+	        var isColliding = false;
+	        for (var i = 0; i < intersections.length; i++) {
+	            if (intersections[i].distance <= 2) {
+	                isColliding = true;
+	            }
+	        }
+
+
+	        // Create a new matrix and vector
+	        var matrix2 = new THREE.Matrix4();
+	        matrix2.extractRotation(player2.matrix);
+	        var direction2 = new THREE.Vector3(0, 0, 1); // Backward
+	        direction2 = direction2.applyMatrix4(matrix2);
+
+	        // raycast from the player's temp posistion in the direction they are facing
+	        var raycaster2 = new THREE.Raycaster(player2.position, direction2);
+	        raycaster2.intersectObjects(objects);
+	        var intersections2 = raycaster2.intersectObjects(objects);
+	        for (var i = 0; i < intersections2.length; i++) {
+	            if (intersections2[i].distance <= 2) {
+	                isColliding = true;
+	            }
+	        }
+
+
+	        // Create a new matrix and vector
+	        var matrix3 = new THREE.Matrix4();
+	        matrix3.extractRotation(player2.matrix);
+	        var direction3 = new THREE.Vector3(1, 0, 0); // Left?
+	        direction3 = direction3.applyMatrix4(matrix3);
+
+	        // raycast from the player's temp posistion in the direction they are facing
+	        var raycaster3 = new THREE.Raycaster(player2.position, direction3);
+	        raycaster3.intersectObjects(objects);
+	        var intersections3 = raycaster3.intersectObjects(objects);
+	        for (var i = 0; i < intersections3.length; i++) {
+	            if (intersections3[i].distance <= 2) {
+	                isColliding = true;
+	            }
+	        }
+
+
+	        // Create a new matrix and vector
+	        var matrix4 = new THREE.Matrix4();
+	        matrix4.extractRotation(player2.matrix);
+	        var direction4 = new THREE.Vector3(-1, 0, 0); // Right?
+	        direction4 = direction4.applyMatrix4(matrix4);
+
+	        // raycast from the player's temp posistion in the direction they are facing
+	        var raycaster4 = new THREE.Raycaster(player2.position, direction4);
+	        raycaster4.intersectObjects(objects);
+	        var intersections4 = raycaster4.intersectObjects(objects);
+	        for (var i = 0; i < intersections4.length; i++) {
+	            if (intersections4[i].distance <= 2) {
+	                isColliding = true;
+	            }
+	        }
+
+	        // if the player is colliding then move them back/prevent them
+	        if (isColliding == true) {
+	            player.translateX(-velocity.x * delta);
+	            player.translateY(velocity.y * delta);
+	            player.translateZ(-velocity.z * delta);
+	        }
+	        else {
+	            // do nothing
+	        }
+
+
+	        prevTime = time;
+	    }
 		
 	}
 
@@ -544,27 +578,3 @@ var healthbar = document.getElementById('progress-bar');
         }
     });
 }
-
-/*
-
-		<script src="libraries/three.min.js"></script>
-		<script src="libraries/PreBuilt/controls/FirstPersonControls.js"></script>
-		<script src="inputmanager.js"></script>
-		<script src="worldmanager.js"></script>
-		<script src="enemymanager.js"></script>
-		<script src="networkmanager.js"></script>
-		<div id="blocker">
-			<div id="instructions">
-				<span style="font-size:40px">Click to play</span>
-				<br />
-				(W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
-			</div>
-		</div>
-		<div id="health">
-			<div id="percent">Health: <span id="p"></span></div>
-			<progress id="progress-bar" value="100" max="100"></progress>
-		</div>
-		<script src="fpsexample.js"></script>
-
-
-*/

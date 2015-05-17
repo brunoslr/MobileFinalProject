@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+</head>
+<body>
+    <div>
+        <label id="accValue">Value</label>
+    </div>
+    <script>
+        window.addEventListener('ondevicemotion', acc, false); //Usually words with safari and opera
+        window.addEventListener('ondeviceorientation', acc, false); //For chrome
+        window.addEventListener('onmozorientation', acc, false); //For Moz
+
+        this.ondevicemotion = acc;
+        this.ondeviceorientation = acc;
+        this.onmozorientation = acc;
+        this.deviceorientation = acc;
+        function acc(e) {
+            var t = document.getElementById('accValue');
+            t.innerText = e.type;
+        }
+
+        function accEvent(event){
+            var x = event.accelerationIncludingGravity.x;
+            var z = event.accelerationIncludingGravity.z;
+            var y = event.accelerationIncludingGravity.y;
+            console.log('logging' + x + '' + y + '' + z);
+            var t = document.getElementById('accValue');
+            t.innerText = 'logging' + x + '' + y + '' + z;
+            if (x < -2.5)
+                this.moveForward = true;
+            if (x > 2.5)
+                this.moveBackward = true;
+            if (x > 3.5 || x < -3.5)
+                this.isSprinting = true;
+            else
+                this.isSprinting = false;
+
+            if (z > 12 || z < 8) {
+                if (this.canJump == true) this.moveJump = true;
+                this.canJump = false;
+            }
+
+            if (y > 2.5)
+                this.moveRight = true;
+            else
+                if (y < -2.5)
+                    this.moveLeft = true;
+
+            this.acceleration = new THREE.Vector3(x, y, z);
+        }
+
+    </script>
+</body>
+</html>
