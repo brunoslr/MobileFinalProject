@@ -3,7 +3,8 @@ var WebSocketServer = require('ws').Server
 var IDIterator= 0;
 var wsArray = new Array();
 var worldData= "world data\n";
-
+var bulletCounter= 0;
+var hitBulletArray= new Array();
 var posX, posY, posZ;
 for(var i=0; i<50; i++){
 	posX = Math.floor(Math.random() * 20 - 10) * 20;
@@ -39,9 +40,24 @@ wss.on('connection', function connection(ws) {
 			}
 		break;
 		case "bullet spawn":
-			sendToAllBut(message,splitArray[1]);
+			var newMessage= "bullet spawn\n" + bulletCounter + "\n";
+			for(var i=1; i<splitArray.length; i++){
+				newMessage+=splitArray[i] + "\n";
+			}
+			bulletCounter++;
+			sendToAll(newMessage);
 		break;
-		
+		case "bullet hit player":
+			var hitPlayerID=parseInt(splitArray[1]);
+			var bulletID=parseInt(splitArray[2]);
+			if(hitBulletArray[bulletID]==null){
+				hitBulletArray[bulletID]=true;
+				var bulletSendData="bullet hit player confirmed\n";
+				bulletSendData+=hitPlayerID+ "\n";
+				bulletID+=bulletID;
+				sendToAll(bulletSendData);
+			}
+		break;
 		default:
 		break;
 	}

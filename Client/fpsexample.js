@@ -162,10 +162,10 @@ var healthbar = document.getElementById('progress-bar');
 		controls.lookSpeed = 10.0;
 		controls.autoForward = false;
 
-        player = controls.getObject();;
+        player = controls.getObject();
         player.position.y = 10;
         scene.add(player);
-        player2 = controls.getObject();;
+        player2 = controls.getObject();
         scene.add(player2);
 		networkManager = new NetworkManager();
 
@@ -573,7 +573,6 @@ var healthbar = document.getElementById('progress-bar');
         {
 			var shootDirection = new THREE.Vector3();
 			getShootDir(shootDirection);
-            networkManager.spawnBullet(player.position, shootDirection);
 			networkManager.sendBullet(player.position,shootDirection);
         }
     });
