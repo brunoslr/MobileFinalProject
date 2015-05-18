@@ -24,7 +24,6 @@ var worldManager = new WorldManager();
 var networkManager;
 var raycaster;
 
-
 var geometry = new THREE.SphereGeometry( 2, 8,6 );
 var ballMaterial = new THREE.MeshPhongMaterial({
 	wireframe: true,
@@ -35,15 +34,6 @@ var projector = new THREE.Projector();
 var balls1 = [];
 var fVectors = [];
 
-// var blocker = document.getElementById('//blocker');
-// var instructions = document.getElementById('// instructions');
-
-	
-	
-var ballMaterial = new THREE.MeshPhongMaterial({
-	wireframe: false,
-	color: 0xff0000
-});
 var ballGeometry = new THREE.SphereGeometry(1, 8, 6);
 var shootDirection = new THREE.Vector3();
 var projector = new THREE.Projector();
@@ -51,31 +41,20 @@ var balls = [];
 var ballMeshes = [];
 this.onload = function () {
 var healthbar = document.getElementById('progress-bar');
-
-    // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
-
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
     if (havePointerLock) {
-		// console.log("HERE");
         var element = document.body;
         var pointerlockchange = function (event) {
             if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
                 inputManager.controlsEnabled = true;
                 controls.enabled = true;
-                //blocker.style.display = 'none';
-
             }
             else {
-                //blocker.style.display = '-webkit-box';
-                //blocker.style.display = '-moz-box';
-                //blocker.style.display = 'box';
-                // instructions.style.display = '';
             }
         }
 
         var pointerlockerror = function (event) {
-            // // instructions.style.display = '';
         }
 
         // Hook pointer lock state change events
@@ -127,37 +106,55 @@ var healthbar = document.getElementById('progress-bar');
         scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0xffffff, 0, 750);
 
+        var spotLight = new THREE.SpotLight(0x4f0f5f);
+        spotLight.position.set(100, 100, 100);
+        spotLight.shadowDarkness = 1;
+        spotLight.shadowCameraVisible = true;
+        spotLight.castShadow = true;
+
+        spotLight.shadowMapWidth = 1024;
+        spotLight.shadowMapHeight = 1024;
+
+        spotLight.shadowCameraNear = 500;
+        spotLight.shadowCameraFar = 4000;
+        spotLight.shadowCameraFov = 30;
+
+        scene.add(spotLight);
         worldManager.addLight(scene);
 
+
         //skybox stuff
-        var urlPrefix = "Assets/skybox/";
-        var urls = [urlPrefix + 'negx.PNG', urlPrefix + 'posx.PNG',
-            urlPrefix + 'posy.PNG', urlPrefix + 'negy.PNG',
-            urlPrefix + 'posz.PNG', urlPrefix + 'negz.PNG'];
+        var urlPrefix = "Textures/Skybox/";
+        var urls = [urlPrefix + 'xn.png', urlPrefix + 'xp.png',
+            urlPrefix + 'yp.png', urlPrefix + 'yn.png',
+            urlPrefix + 'zp.png', urlPrefix + 'zn.png'];
         var cubemap = THREE.ImageUtils.loadTextureCube(urls); // load textures
         cubemap.format = THREE.RGBFormat;
         var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
         shader.uniforms['tCube'].value = cubemap; // apply textures to shader
         var skyBoxMaterial = new THREE.ShaderMaterial({
-            fragmentShader:         shader.fragmentShader,
-            vertexShader:           shader.vertexShader,
-            uniforms:               shader.uniforms,
-            depthWrite:             false,
-            side:                   THREE.BackSide
+            fragmentShader: shader.fragmentShader,
+            vertexShader: shader.vertexShader,
+            uniforms: shader.uniforms,
+            depthWrite: false,
+            side: THREE.BackSide
         });
         var skybox = new THREE.Mesh(
               new THREE.CubeGeometry(1000000, 1000000, 1000000),
               skyBoxMaterial
             );
         scene.add(skybox);
-        
         // skybox end
 
 
         loader= new THREE.JSONLoader();
 
         //controls = new THREE.PointerLockControls(camera);
-		controls = new THREE.FirstPersonControls(camera);
+        if (!accPresent)
+            controls = new THREE.FirstPersonControls(camera);
+        else
+            controls = new THREE.MotionControls(camera);
+        camera.castShadow = true;
 		controls.movementSpeed = 25.0;
 		controls.lookSpeed = 10.0;
 		controls.autoForward = false;
@@ -193,16 +190,23 @@ var healthbar = document.getElementById('progress-bar');
 
 		for ( var i = 0; i < 0; i ++ ) {
 
-			var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
-
-			var mesh = new THREE.Mesh( geometry, material );
+		    var material = new THREE.MeshPhongMaterial({
+		        specular: 0xffffff,
+		        shading: THREE.FlatShading,
+		        vertexColors: THREE.VertexColors,
+		        color: 0xffffff,
+		        wireframe: false,
+		        ambient: 0x050505,
+		        specular: 0x555555,
+		        shininess: 10
+		    });
+			var mesh = new THREE.Mesh(geometry, material);
+			mesh.castShadow = true;
 			mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
 			mesh.position.y=10;
 			mesh.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
 			scene.add( mesh );
-
 			material.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-
 			enemies.push( mesh );
 		}
 		
@@ -216,7 +220,9 @@ var healthbar = document.getElementById('progress-bar');
 
 		// set up the cube that the collision box will rest on
 		var cubeGeometry = new THREE.BoxGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
-		var cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
+		var cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x8888ff });
+		cubeMaterial.castShadow = true;
+
 		playerBox1 = new THREE.Mesh(cubeGeometry,cubeMaterial);
 		playerBox1.receiveShadow = true;
 		playerBox1.castShadow = true;
@@ -243,8 +249,8 @@ var healthbar = document.getElementById('progress-bar');
 			networkManager.update(controls);
 			
 			// update the player's and collision box's rotation to the camera's rotation
-			player.rotation = controls.object.rotation;
-			playerBox1.rotation = controls.object.rotation;
+			player.rotation = controls.getObject().rotation;
+			playerBox1.rotation = controls.getObject().rotation;
 			
 			// update the collision box's rotation and position to the player's rotation and position
 			playerBox1.rotation.x = player.rotation.x;

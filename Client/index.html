@@ -13,6 +13,7 @@
 		<script src="worldmanager.js"></script>
 		<script src="enemymanager.js"></script>
 		<script src="networkmanager.js"></script>
+        <script src="MotionControls.js"></script>
 		<!--<div id="blocker">
 			<div id="instructions">
 				<span style="font-size:40px">Click to play</span>
@@ -128,19 +129,40 @@
                     }
                 }
             }
-            var hasTouch = false;
-            window.addEventListener('touchstart', function setHasTouch() {
-                hasTouch = true;
-                // Remove event listener once fired, otherwise it'll kill scrolling
-                // performance
-                window.removeEventListener('touchstart', setHasTouch);
-            }, false);
+            var hasTouch = true;
 
             if (hasTouch) {
                 this.addEventListener("touchstart", touchStart, false);
                 this.addEventListener("touchmove", touchMove, false);
+                this.addEventListener("touchend", touchEnd, false);
+                this.addEventListener("mousemove", mouseMove, false);
             }
+
+            function mouseMove() {
+                if (start.x != 0) {
+                    offset = {};
+                    offset.x = start.x - event.pageX;
+                    offset.y = start.y - event.pageY;
+                    var axisX = new THREE.Vector3(0, 1, 0).normalize();
+                    var axisY = new THREE.Vector3(1, 0, 0).normalize();
+                    controls.getObject().order = 'XYZ';
+                    controls.getObject().rotateOnAxis(axisX, degInRad(offset.x * rotationSpeed));
+                    controls.getObject().rotateOnAxis(axisY, degInRad(offset.y * rotationSpeed));
+                    console.log(controls.object3D.rotation);
+                    renderer.render(scene, camera);
+
+                }
+                else {
+                    start.x = event.pageX;
+                    start.y = event.pageY;
+                }
+            }
+
             var start = { x: 0, y: 0 };
+
+            function touchEnd() {
+                start = { x: 0, y: 0 };
+            }
 
             function touchStart(e) {
 
@@ -148,24 +170,24 @@
                 start.y = event.touches[0].pageY;
             }
 
-            var rotationSpeed = 0.0025;
+            var rotationSpeed = 0.025;
             function touchMove(e) {
                 offset = {};
 
                 offset.x = start.x - event.touches[0].pageX;
                 offset.y = start.y - event.touches[0].pageY;
 
-                player.rotation.x += degInRad(offset.x * rotationSpeed);
-                player.rotation.y += degInRad(offset.y * rotationSpeed);
-
+                controls.object3D.rotation.x += degInRad(offset.x * rotationSpeed);
+                controls.object3D.rotation.y += degInRad(offset.y * rotationSpeed);
+                
                 renderer.render(scene, camera);                
-                return offset;
-
+                
             }
 
             function degInRad(w) {
                 return w * Math.PI / 180;
             }
+
 
         </script>
 	</body>

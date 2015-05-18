@@ -41,7 +41,8 @@ WorldManager.prototype.initFloor= function(scene)
 
 		var material = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors } );
 
-		var mesh = new THREE.Mesh( geometry, material );
+		var mesh = new THREE.Mesh(geometry, material);
+		mesh.castShadow = true;
 		scene.add(mesh);
 }
 
@@ -67,7 +68,8 @@ WorldManager.prototype.addBoxes= function(scene, objects)
 
 		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
 
-		var mesh = new THREE.Mesh( geometry, material );
+		var mesh = new THREE.Mesh(geometry, material);
+		mesh.castShadow = true;
 		mesh.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
 		// mesh.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
 		mesh.position.y=10;
