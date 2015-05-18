@@ -1,0 +1,3 @@
+How to run:
+navigate to the Server folder in your command line, then run the index.js file in node (node index.js)
+navigate to the client folder, and open index.html
