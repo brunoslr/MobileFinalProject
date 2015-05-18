@@ -126,8 +126,8 @@ function NetworkManager(){
         scene.add( sphere );
 		//ballOwners.push( this.playerID );
 		this.bulletsShot++;
-		//console.log(this.bulletsShot);
-		//console.log(this.curPlayerID);
+		console.log(this.bulletsShot);
+		console.log(this.curPlayerID);
 	};
 	
 	this.sendBullet = function(positionVector, velocityVector){

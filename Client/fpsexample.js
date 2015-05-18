@@ -41,7 +41,7 @@ var fVectors = [];
 	
 	
 var ballMaterial = new THREE.MeshPhongMaterial({
-	wireframe: true,
+	wireframe: false,
 	color: 0xff0000
 });
 var ballGeometry = new THREE.SphereGeometry(1, 8, 6);
@@ -218,8 +218,8 @@ var healthbar = document.getElementById('progress-bar');
 		var cubeGeometry = new THREE.BoxGeometry( 1.0, 1.0, 1.0, 10, 10, 10 );
 		var cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
 		playerBox1 = new THREE.Mesh(cubeGeometry,cubeMaterial);
-		playerBox1.receiveShadow = false;
-		playerBox1.castShadow = false;
+		playerBox1.receiveShadow = true;
+		playerBox1.castShadow = true;
 		playerBox1.position = camera.position;
 		direction = new THREE.Vector3(0, 0, 0);
     }
@@ -232,10 +232,9 @@ var healthbar = document.getElementById('progress-bar');
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
+
     function update()
     {
-        var t = document.getElementById('console');
-        t.innerText = '';
         //if (inputManager.controlsEnabled)
 		if (true)
         {
@@ -419,23 +418,23 @@ var healthbar = document.getElementById('progress-bar');
 	        // check about if the player is moving 
 	        if (inputManager.moveForward) {
 	            velocity.z -= 400.0 * delta;
-	            var t = document.getElementById('console');
-	            t.innerText += "moved forward";
+	           //var t=document.getElementById('console');
+	            //t.innerText += "moved forward";
 	        }
 	        if (inputManager.moveBackward) {
 	            velocity.z += 400.0 * delta;
-	            var t = document.getElementById('console');
-	            t.innerText += "moveBackward moveBackward";
+	           //var t=document.getElementById('console');
+	            //t.innerText += "moveBackward moveBackward";
 	        }
 	        if (inputManager.moveLeft) {
 	            velocity.x -= 400.0 * delta;
-	            var t = document.getElementById('console');
-	            t.innerText += "moveLeft moveLeft";
+	           //var t=document.getElementById('console');
+	            //t.innerText += "moveLeft moveLeft";
 	        }
 	        if (inputManager.moveRight) {
 	            velocity.x += 400.0 * delta;
-	            var t = document.getElementById('console');
-	            t.innerText += "movedRight moveRight";
+	           //var t=document.getElementById('console');
+	            //t.innerText += "movedRight moveRight";
 	        }
 
 	        // move the player, preemptively
@@ -544,9 +543,9 @@ var healthbar = document.getElementById('progress-bar');
     }
 
     function draw() {
-        update();
-        requestAnimationFrame(draw);
+        update();        
         renderer.render(scene, camera);
+        requestAnimationFrame(draw);
     }
     
 	function getShootDir(targetVec) {
@@ -557,8 +556,7 @@ var healthbar = document.getElementById('progress-bar');
         targetVec.copy(ray.direction);
     }
 
-    function moveProjectiles()
-    {
+    function moveProjectiles() {
         for(var i=0; i<balls1.length; i++) {
             balls1[i].position.set(balls1[i].position.x + fVectors[i].x * shootVelo,
                 balls1[i].position.y + fVectors[i].y * shootVelo,
@@ -569,6 +567,7 @@ var healthbar = document.getElementById('progress-bar');
     window.addEventListener("ontouchend", function (e) {
         var shootDirection = new THREE.Vector3();
         getShootDir(shootDirection);
+
         networkManager.sendBullet(player.position, shootDirection);
     });
 	window.addEventListener("click", function (e) {

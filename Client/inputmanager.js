@@ -1,4 +1,3 @@
-
 function InputManager() {
 	this.moveForward = false;
 	this.moveBackward = false;
@@ -9,12 +8,9 @@ function InputManager() {
 	this.isSprinting = false;
 	this.controlsEnabled = false;
 	this.acceleration = new THREE.Vector3();
+
 	window.addEventListener( 'keydown', this, false );
 	window.addEventListener('keyup', this, false);
-
-	window.addEventListener('ondevicemotion', this, false); //Usually words with safari and opera
-	window.addEventListener('ondeviceorientation', this, false); //For chrome
-	window.addEventListener('onmozorientation', this, false); //For Moz
 	this.accLeft = false;
 	this.accRight = false;
 	this.lockInput= false;
@@ -26,9 +22,6 @@ InputManager.prototype.handleEvent = function(e){
 	}
 	else if( e.type=="keyup" ) {
 		this.onKeyUp(event);
-	}
-	else if ( e.type == "ondevicemotion" || e.type == "onmozorientation" || e.type == "ondeviceorientation" ) {
-	   
 	}
 };
 

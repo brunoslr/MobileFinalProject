@@ -30,8 +30,22 @@
 		<script src="fpsexample.js"></script>
         <script>
             //acc input
-            this.ondevicemotion = accleration;
-            this.ondeviceorientation = accleration;
+            var console2 = document.getElementById('console2');
+            var accPresent = false;
+            if (window.DeviceMotionEvent) {
+                accPresent = true;
+                var t = document.getElementById('console');
+                t.innerText = "acc present";
+            }
+            else {
+                accPresent = false;
+                var t = document.getElementById('console');
+                t.innerText = "acc absent";
+            }
+            if (accPresent) {
+                this.ondevicemotion = accleration;
+                this.ondeviceorientation = accleration;
+            }
             function accleration() {
                 if (event.type === 'devicemotion') {
                     var x = event.accelerationIncludingGravity.x;
@@ -41,12 +55,15 @@
                     if (x != null && y != null && z != null) {
                         if (x < -0.5) {
                             inputManager.moveForward = true;
+                            console2.innerText = "Forward";
                         }
                         if (x > 0.5) {
                             inputManager.moveBackward = true;
+                            console2.innerText = "Backward";
                         }
                         if (x > 1.5 || x < -1.5) {
                             inputManager.isSprinting = true;
+                            console2.innerText = "isSprinting";
                         }
                         else {
                         }
@@ -62,12 +79,14 @@
 
                         if (y > 0.5) {
                             inputManager.moveRight = true;
+                            console2.innerText = "moveRight";
                         }
                         else
                             if (y < -0.5) {
                                 inputManager.moveLeft = true;
+                                console2.innerText = "moveLeft";
                             }
-
+                        
                         inputManager.acceleration = new THREE.Vector3(x, y, z);
                     }
                 }
@@ -104,17 +123,23 @@
                             if (x > 20) {
                                 inputManager.moveLeft = true;
                             }
-
+                        
                         inputManager.acceleration = new THREE.Vector3(x, y, z);
                     }
                 }
-                var t = document.getElementById('console');
-                t.innerText = 'logging x: ' + x + ' y: ' + y + ' z: ' + z;
             }
+            var hasTouch = false;
+            window.addEventListener('touchstart', function setHasTouch() {
+                hasTouch = true;
+                // Remove event listener once fired, otherwise it'll kill scrolling
+                // performance
+                window.removeEventListener('touchstart', setHasTouch);
+            }, false);
 
-            this.addEventListener("touchstart", touchStart, false);
-            this.addEventListener("touchmove", touchMove, false);
-
+            if (hasTouch) {
+                this.addEventListener("touchstart", touchStart, false);
+                this.addEventListener("touchmove", touchMove, false);
+            }
             var start = { x: 0, y: 0 };
 
             function touchStart(e) {
@@ -123,23 +148,17 @@
                 start.y = event.touches[0].pageY;
             }
 
+            var rotationSpeed = 0.0025;
             function touchMove(e) {
-
                 offset = {};
 
                 offset.x = start.x - event.touches[0].pageX;
                 offset.y = start.y - event.touches[0].pageY;
 
-                var t = document.getElementById('console2');
-                t.innerText = offset.x + " " + offset.y;
+                player.rotation.x += degInRad(offset.x * rotationSpeed);
+                player.rotation.y += degInRad(offset.y * rotationSpeed);
 
-                camera.rotation.x += degInRad(offset.x);
-                camera.rotation.y += degInRad(offset.y);
-
-                renderer.render(scene, camera);
-                console.log(camera.rotation.x);
-                console.log(camera.rotation.y);
-
+                renderer.render(scene, camera);                
                 return offset;
 
             }
