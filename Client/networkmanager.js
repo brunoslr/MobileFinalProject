@@ -25,7 +25,7 @@ function NetworkManager(){
 		
 		switch(this.state){
 			case 0://socket has not yet been created
-				this.exampleSocket =new WebSocket("ws://127.0.0.1:8080");
+				this.exampleSocket =new WebSocket("ws://191.236.195.180:8080");
 				this.state= 1;
 				this.exampleSocket.onopen =this.socketOnOpen.bind(this);
 				this.exampleSocket.onmessage = this.messageReceived.bind(this);
