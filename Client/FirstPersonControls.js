@@ -45,10 +45,18 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 	this.moveLeft = false;
 	this.moveRight = false;
 
+	this.accForward = false;
+	this.accBackward = false;
+	this.accLeft = false;
+	this.accRight = false;
+
 	this.mouseDragOn = false;
 
 	this.viewHalfX = 0;
 	this.viewHalfY = 0;
+
+	this.isSprinting = false;
+	this.sprintMultiplier = 1;
 
 	if ( this.domElement !== document ) {
 
@@ -166,7 +174,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 			case 82: /*R*/ this.moveUp = true; break;
 			case 70: /*F*/ this.moveDown = true; break;
-
+		    case 0x10: /* L SHIFT => keyCode = 16*/
+		        this.isSprinting = true; break;
 		}
 
 	};
@@ -189,13 +198,14 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 			case 82: /*R*/ this.moveUp = false; break;
 			case 70: /*F*/ this.moveDown = false; break;
-
+		    case 0x10: /* L SHIFT => keyCode = 16*/
+		        this.isSprinting = false; break;
 		}
 
 	};
 
 	this.update = function( delta ) {
-
+	    console.log(this.object.position);
 		if ( this.enabled === false ) return;
 
 		if ( this.heightSpeed ) {
@@ -203,7 +213,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 			var y = THREE.Math.clamp( this.object.position.y, this.heightMin, this.heightMax );
 			var heightDelta = y - this.heightMin;
 
-			this.autoSpeedFactor = delta * ( heightDelta * this.heightCoef );
+			//this.autoSpeedFactor = delta * ( heightDelta * this.heightCoef );
 
 		} else {
 
@@ -212,12 +222,36 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 		}
 
 		var actualMoveSpeed = delta * this.movementSpeed;
+		if (this.isSprinting)
+		    sprintMultiplier = 2;
+		else
+		    sprintMultiplier = 1;
 
-		if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ) this.object.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
-		if ( this.moveBackward ) this.object.translateZ( actualMoveSpeed );
+		if (this.moveForward || (this.accForward && !this.accBackward) || (this.autoForward && !this.moveBackward)) {
+		    this.object.translateZ(-(actualMoveSpeed * sprintMultiplier));
 
-		if ( this.moveLeft ) this.object.translateX( - actualMoveSpeed );
-		if ( this.moveRight ) this.object.translateX( actualMoveSpeed );
+		    if (this.accForward)
+		        this.accBackward = false;
+		}
+		if (this.moveBackward || this.accBackward) {
+		    this.object.translateZ(actualMoveSpeed * sprintMultiplier);
+
+		    if (this.accBackward)
+		        this.accForward = false;
+		}
+
+		if (this.moveLeft || this.accLeft) {
+		    this.object.translateX(-actualMoveSpeed);
+
+            if( this.accLeft)
+		        this.accRight = false;
+		}
+		if (this.moveRight || this.accRight) {
+		    this.object.translateX(actualMoveSpeed);
+            
+		    if (this.accRight)
+		        this.accLeft = false;
+		}
 
 		//if ( this.moveUp ) this.object.translateY( actualMoveSpeed );
 		//if ( this.moveDown ) this.object.translateY( - actualMoveSpeed );

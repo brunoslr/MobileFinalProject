@@ -44,11 +44,24 @@
 		cursor: pointer;
 
 	}
-	#health {
-		
+	#health {		
 		height: 12%;
 		margin: auto;
 		position: absolute;
+        margin-top: 0px;
 		top: 0; left: 0; bottom: 0; right: 0;
 	}
+    
 
+    .crosshair {
+        min-height: 50px;
+        min-width: 50px;
+        width:50px;
+        height:50px;
+        max-width:50px;
+        max-height:50px;
+
+        /*this is causing the white background overlay. I dont know what to do ! -GOSAR*/
+        /*margin-top: 25%;*/
+        margin-left: 50%;
+    }

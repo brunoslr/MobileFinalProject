@@ -17,8 +17,6 @@ var direction;
 //3d model loading
 var loader;
 
-var inputManager = new InputManager();
-
 var enemyManager = new EnemyManager();
 var worldManager = new WorldManager();
 var networkManager;
@@ -47,7 +45,6 @@ var healthbar = document.getElementById('progress-bar');
         var element = document.body;
         var pointerlockchange = function (event) {
             if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
-                inputManager.controlsEnabled = true;
                 controls.enabled = true;
             }
             else {
@@ -123,37 +120,12 @@ var healthbar = document.getElementById('progress-bar');
         worldManager.addLight(scene);
 
 
-        //skybox stuff
-        var urlPrefix = "Textures/Skybox/";
-        var urls = [urlPrefix + 'xn.png', urlPrefix + 'xp.png',
-            urlPrefix + 'yp.png', urlPrefix + 'yn.png',
-            urlPrefix + 'zp.png', urlPrefix + 'zn.png'];
-        var cubemap = THREE.ImageUtils.loadTextureCube(urls); // load textures
-        cubemap.format = THREE.RGBFormat;
-        var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
-        shader.uniforms['tCube'].value = cubemap; // apply textures to shader
-        var skyBoxMaterial = new THREE.ShaderMaterial({
-            fragmentShader: shader.fragmentShader,
-            vertexShader: shader.vertexShader,
-            uniforms: shader.uniforms,
-            depthWrite: false,
-            side: THREE.BackSide
-        });
-        var skybox = new THREE.Mesh(
-              new THREE.CubeGeometry(1000000, 1000000, 1000000),
-              skyBoxMaterial
-            );
-        scene.add(skybox);
-        // skybox end
-
 
         loader= new THREE.JSONLoader();
 
         //controls = new THREE.PointerLockControls(camera);
-        if (!accPresent)
+        
             controls = new THREE.FirstPersonControls(camera);
-        else
-            controls = new THREE.MotionControls(camera);
         camera.castShadow = true;
 		controls.movementSpeed = 25.0;
 		controls.lookSpeed = 10.0;
@@ -180,16 +152,13 @@ var healthbar = document.getElementById('progress-bar');
 
 		var geometry = new THREE.BoxGeometry( 10, 20, 10 );
 		for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
-
 			var face = geometry.faces[ i ];
 			face.vertexColors[ 0 ] = new THREE.Color( 1,0,0 );
 			face.vertexColors[ 1 ] = new THREE.Color( 1,0,0);
 			face.vertexColors[ 2 ] = new THREE.Color( 1,0,0 );
-
 		}
 
 		for ( var i = 0; i < 0; i ++ ) {
-
 		    var material = new THREE.MeshPhongMaterial({
 		        specular: 0xffffff,
 		        shading: THREE.FlatShading,
@@ -241,7 +210,7 @@ var healthbar = document.getElementById('progress-bar');
 
     function update()
     {
-        //if (inputManager.controlsEnabled)
+        
 		if (true)
         {
 		    collisionDetectionAndMovement();
@@ -286,7 +255,7 @@ var healthbar = document.getElementById('progress-bar');
 		// move the cube up,left,down,right
 		if ( controls.moveRight )
 		{
-			tempPerson.translateX( controls.movementSpeed);
+			tempPerson.translateX( controls.movementSpeed );
 			typeHit = 1;
 		}
 		else if ( controls.moveLeft )
@@ -413,35 +382,7 @@ var healthbar = document.getElementById('progress-bar');
 	    if (!isNaN(delta)) {
 	        velocity.x -= velocity.x * 10.0 * delta;
 	        velocity.z -= velocity.z * 10.0 * delta;
-	        velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-
-	        // check if jumping
-	        if (inputManager.moveJump) {
-	            velocity.y += 350;
-	            inputManager.moveJump = false;
-	        }
-
-	        // check about if the player is moving 
-	        if (inputManager.moveForward) {
-	            velocity.z -= 400.0 * delta;
-	           //var t=document.getElementById('console');
-	            //t.innerText += "moved forward";
-	        }
-	        if (inputManager.moveBackward) {
-	            velocity.z += 400.0 * delta;
-	           //var t=document.getElementById('console');
-	            //t.innerText += "moveBackward moveBackward";
-	        }
-	        if (inputManager.moveLeft) {
-	            velocity.x -= 400.0 * delta;
-	           //var t=document.getElementById('console');
-	            //t.innerText += "moveLeft moveLeft";
-	        }
-	        if (inputManager.moveRight) {
-	            velocity.x += 400.0 * delta;
-	           //var t=document.getElementById('console');
-	            //t.innerText += "movedRight moveRight";
-	        }
+	        // velocity.y -= velocity.y * 9.8 * 100.0 * delta; // 100.0 = mass
 
 	        // move the player, preemptively
 	        player.translateX(velocity.x * delta);
@@ -464,8 +405,6 @@ var healthbar = document.getElementById('progress-bar');
 	                isColliding = true;
 	            }
 	        }
-
-
 	        // Create a new matrix and vector
 	        var matrix2 = new THREE.Matrix4();
 	        matrix2.extractRotation(player2.matrix);
@@ -552,6 +491,8 @@ var healthbar = document.getElementById('progress-bar');
         update();        
         renderer.render(scene, camera);
         requestAnimationFrame(draw);
+
+        renderStaticGUI();
     }
     
 	function getShootDir(targetVec) {
@@ -573,7 +514,6 @@ var healthbar = document.getElementById('progress-bar');
     window.addEventListener("ontouchend", function (e) {
         var shootDirection = new THREE.Vector3();
         getShootDir(shootDirection);
-
         networkManager.sendBullet(player.position, shootDirection);
     });
 	window.addEventListener("click", function (e) {
