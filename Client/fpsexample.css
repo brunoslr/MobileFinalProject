@@ -52,8 +52,15 @@
 		top: 0; left: 0; bottom: 0; right: 0;
 	}
     
+	#crosshair2{
+		position:fixed;
+		width: 5px;
+		height: 5px;
+		left: 48%;
+		top: 50%;
+	}
 
-    .crosshair {
+    #crosshair {
         min-height: 50px;
         min-width: 50px;
         width:50px;
@@ -64,4 +71,5 @@
         /*this is causing the white background overlay. I dont know what to do ! -GOSAR*/
         /*margin-top: 25%;*/
         margin-left: 50%;
+		margin-top: 50%;
     }

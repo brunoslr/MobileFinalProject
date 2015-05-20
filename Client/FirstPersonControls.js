@@ -205,7 +205,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 	};
 
 	this.update = function( delta ) {
-	    console.log(this.object.position);
+	    //console.log(this.object.position);
 		if ( this.enabled === false ) return;
 
 		if ( this.heightSpeed ) {

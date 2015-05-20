@@ -24,7 +24,7 @@ var raycaster;
 
 var isPaused = false;
 
-var geometry = new THREE.SphereGeometry( 2, 8,6 );
+var geometry = new THREE.SphereGeometry( 0.5, 8,6 );
 var ballMaterial = new THREE.MeshPhongMaterial({
 	wireframe: true,
 	color: 0xff0000
@@ -40,7 +40,7 @@ var projector = new THREE.Projector();
 var balls = [];
 var ballMeshes = [];
 this.onload = function () {
-var healthbar = document.getElementById('progress-bar');
+
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
     if (havePointerLock) {
@@ -127,7 +127,7 @@ var healthbar = document.getElementById('progress-bar');
 
         //controls = new THREE.PointerLockControls(camera);
         
-            controls = new THREE.FirstPersonControls(camera);
+        controls = new THREE.FirstPersonControls(camera);
         camera.castShadow = true;
 		controls.movementSpeed = 25.0;
 		controls.lookSpeed = 10.0;
@@ -240,7 +240,6 @@ var healthbar = document.getElementById('progress-bar');
         }
     }
 	
-	
 	function collisionDetect()
 	{
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -351,8 +350,6 @@ var healthbar = document.getElementById('progress-bar');
 		for(var i=0; i < objects.length; i++) {
 			objectArray.push(objects[i].cube);
 		}
-		
-		
 		
 		// for each ray
 		for (var i = 0; i < rays.length; i++) {
@@ -517,12 +514,14 @@ var healthbar = document.getElementById('progress-bar');
     window.addEventListener("ontouchend", function (e) {
         var shootDirection = new THREE.Vector3();
         getShootDir(shootDirection);
+            networkManager.spawnBullet(player.position, shootDirection);
         networkManager.sendBullet(player.position, shootDirection);
     });
 	window.addEventListener("click", function (e) {
         {
 			var shootDirection = new THREE.Vector3();
 			getShootDir(shootDirection);
+            networkManager.spawnBullet(player.position, shootDirection);
 			networkManager.sendBullet(player.position,shootDirection);
         }
     });

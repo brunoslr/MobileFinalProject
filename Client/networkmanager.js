@@ -52,7 +52,7 @@ function NetworkManager(){
 				if(this.state ==2 ){
 					this.state= 3;
 					this.playerID= parseInt(splitString[1]);
-					//console.log(this.playerID)
+					//console.log(this.playerID);
 					this.addBoxes(event.data);
 				}
 			break;
@@ -117,7 +117,7 @@ function NetworkManager(){
 	};
 	
 	this.spawnBullet = function(position, direction, bulletID, bulletPlayerID){
-		 var sphere = new THREE.Mesh( geometry, ballMaterial );
+		var sphere = new THREE.Mesh( geometry, ballMaterial );
         sphere.position.set(position.x, position.y, position.z);
 		sphere.bulletPlayerID=bulletPlayerID;
 		sphere.bulletID= bulletID;
@@ -126,8 +126,8 @@ function NetworkManager(){
         scene.add( sphere );
 		//ballOwners.push( this.playerID );
 		this.bulletsShot++;
-		console.log(this.bulletsShot);
-		console.log(this.curPlayerID);
+		//console.log(this.bulletsShot);
+		//console.log(this.curPlayerID);
 	};
 	
 	this.sendBullet = function(positionVector, velocityVector){
@@ -171,9 +171,10 @@ function NetworkManager(){
 		this.send(sendHitString);
 	};
 	
-	this.resolveBulletCollision= function (hitPlayerID,bulletID){
-		if(this.playerID==hitPlayerID){
-			console.log("DECREMENT HEALTH");
+	this.resolveBulletCollision= function (hitPlayerID, bulletID){
+		if(this.playerID != bulletID){
+			console.log(this.playerID);
+			reduceHealth(5);
 		}
 		for(var i = 0; i < this.ballsArray.length; i++)
 		{
@@ -259,6 +260,13 @@ function NetworkManager(){
 				
 			}
 		}
+	}
+	
+	function reduceHealth( damage)
+	{
+		var healthbar = document.getElementById('progress-bar');
+		console.log("here");
+		healthbar.value = healthbar.value - damage;
 	}
 	
 };
