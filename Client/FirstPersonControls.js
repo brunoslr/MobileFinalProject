@@ -204,8 +204,9 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 	};
 
+	this.accMultiplier = 1;
+
 	this.update = function( delta ) {
-	    //console.log(this.object.position);
 		if ( this.enabled === false ) return;
 
 		if ( this.heightSpeed ) {
@@ -213,7 +214,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 			var y = THREE.Math.clamp( this.object.position.y, this.heightMin, this.heightMax );
 			var heightDelta = y - this.heightMin;
 
-			//this.autoSpeedFactor = delta * ( heightDelta * this.heightCoef );
+			this.autoSpeedFactor = delta * ( heightDelta * this.heightCoef );
 
 		} else {
 
@@ -221,33 +222,40 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 		}
 
+		if (this.accBackward || this.accForward || this.accLeft || this.accRight)
+		    this.accMultiplier = 3;
+		else
+		    this.accMultiplier = 1;
+
 		var actualMoveSpeed = delta * this.movementSpeed;
 		if (this.isSprinting)
-		    sprintMultiplier = 2;
+		    sprintMultiplier = 3;
 		else
 		    sprintMultiplier = 1;
 
-		if (this.moveForward || (this.accForward && !this.accBackward) || (this.autoForward && !this.moveBackward)) {
-		    this.object.translateZ(-(actualMoveSpeed * sprintMultiplier));
+		if (this.moveForward || (this.accForward) || (this.autoForward && !this.moveBackward)) {
+		    this.object.translateZ(-(actualMoveSpeed * sprintMultiplier) * this.accMultiplier);		    
 
-		    if (this.accForward)
-		        this.accBackward = false;
+            
 		}
-		if (this.moveBackward || this.accBackward) {
-		    this.object.translateZ(actualMoveSpeed * sprintMultiplier);
 
-		    if (this.accBackward)
-		        this.accForward = false;
+
+		if (this.moveBackward || this.accBackward) {
+		    this.object.translateZ(actualMoveSpeed * sprintMultiplier * this.accMultiplier);
+
+		    if (this.accBackward) {
+		        this.accBackward = false;
+		    }
 		}
 
 		if (this.moveLeft || this.accLeft) {
-		    this.object.translateX(-actualMoveSpeed);
+		    this.object.translateX(-actualMoveSpeed * this.accMultiplier);
 
             if( this.accLeft)
 		        this.accRight = false;
 		}
 		if (this.moveRight || this.accRight) {
-		    this.object.translateX(actualMoveSpeed);
+		    this.object.translateX(actualMoveSpeed * this.accMultiplier);
             
 		    if (this.accRight)
 		        this.accLeft = false;

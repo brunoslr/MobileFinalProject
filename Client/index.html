@@ -23,10 +23,11 @@
 		<div id="health">         
 			<div id="percent">Health: <span id="p"></span></div>
 			<progress id="progress-bar" value="100" max="100"></progress>
+            <label id="console2">blah</label>
 		</div>
         <!--Not good at CSS. Cant figure out how to overlay the cross hair onto the canvas. -GOSAR--> 
         <div  id ="crosshair2" ><img src="Textures/crosshair.png" height = "50px" width = "50px"/></div>
-
+        
 		<script src="fpsexample.js"></script>
         <script>
             var delta = 1 / 60;
@@ -56,41 +57,56 @@
                 this.ondeviceorientation = accleration;
             }
 
+            var console2 = document.getElementById('console2');
+            
+
             function accleration(event) {
                 if (event.type === 'devicemotion') {
                     var x = event.accelerationIncludingGravity.x;
                     var z = event.accelerationIncludingGravity.z;
                     var y = event.accelerationIncludingGravity.y;
                     if (x != null && y != null && z != null) {
-                        if (x < -1) {
-                            controls.accForward = true;
-                        }
-                        if (z > 11 || z < 9) {
-                            if (controls.canJump == true) {
-                                controls.moveJump = true;
-                            }
-                            else {
-                                controls.canJump = false;
-                            }
-                        }
 
+                        //right
                         if (y > 0.5) {
                             controls.accRight = true;
                         }
-                        else
-                            if (y < -0.5) {
-                                controls.accLeft = true;
-                            }
-
-                        if (x > 4.85) {
-                            controls.accBackward = true;
+                        else 
+                        {
+                            controls.accRight = false;
                         }
-
-                        if (x > 6 && x < -3)
+                        
+                        // left
+                        if (y < -0.5) {
+                            controls.accLeft = true;
+                        }
+                        else
+                        {
+                            controls.accLeft = false;
+                        }
+                        
+                        // is sprinting
+                        if (x > 9 && x < -3)
                             controls.isSprinting = true;
                         else
                             controls.isSprinting = false;
 
+                        // forward, back
+                        if (x < -0.2) {
+                            controls.accForward = true;
+                            contorls.accBackward = false;
+                        }
+                        else {
+                            controls.accForward = false;
+                        }
+
+                        if (x > 5) {
+                            controls.accBackward = true;
+                            controls.accForward = false;
+                        }
+                        else {
+                            contorls.accBackward = false;
+                        }
                     }
                 }                
             }
@@ -111,7 +127,7 @@
                 start.y = event.touches[0].pageY;
             }
 
-            var rotationSpeed = 0.25;
+            var rotationSpeed = 1;
             function touchMove(e) {
                 offset = {};
                 offset.x = start.x - event.touches[0].pageX;
