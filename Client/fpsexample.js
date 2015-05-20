@@ -491,8 +491,6 @@ var healthbar = document.getElementById('progress-bar');
         update();        
         renderer.render(scene, camera);
         requestAnimationFrame(draw);
-
-        renderStaticGUI();
     }
     
 	function getShootDir(targetVec) {
