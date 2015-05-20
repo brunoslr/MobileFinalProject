@@ -100,7 +100,7 @@ this.onload = function () {
 
     function init()
     {
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100000);
 
         scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0xffffff, 0, 750);
@@ -199,6 +199,34 @@ this.onload = function () {
 		playerBox1.castShadow = true;
 		playerBox1.position = camera.position;
 		direction = new THREE.Vector3(0, 0, 0);
+
+
+       var urlPrefix = "Textures/Skybox/";
+       var urls = [urlPrefix + 'xn.png', urlPrefix + 'xp.png',
+           urlPrefix + 'yp.png', urlPrefix + 'yn.png',
+           urlPrefix + 'zp.png', urlPrefix + 'zn.png'];
+
+       //var urlPrefix = "Assets/Skybox/";
+       //var urls = [urlPrefix + 'negx.PNG', urlPrefix + 'posx.PNG',
+       //    urlPrefix + 'posy.PNG', urlPrefix + 'negy.PNG',
+       //    urlPrefix + 'posz.PNG', urlPrefix + 'negz.PNG'];
+       var cubemap = THREE.ImageUtils.loadTextureCube(urls); // load textures
+       cubemap.format = THREE.RGBFormat;
+       var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
+       shader.uniforms['tCube'].value = cubemap; // apply textures to shader
+       var skyBoxMaterial = new THREE.ShaderMaterial({
+           fragmentShader: shader.fragmentShader,
+           vertexShader: shader.vertexShader,
+           uniforms: shader.uniforms,
+           depthWrite: false,
+           side: THREE.BackSide
+       });
+       var skybox = new THREE.Mesh(
+             new THREE.BoxGeometry(10000, 10000, 10000),
+             skyBoxMaterial
+           );
+       scene.add(skybox);
+       // skybox end
     }
 
 
