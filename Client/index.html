@@ -40,13 +40,12 @@
                 var deg = 0;
                 switch (window.orientation) {
                     case -90:
-                        deg = -90;
+                        isPaused = false;
                         break;
                     case 90:
-                        deg = 90;
-                        break;
                     default:
-                        deg = 0;
+                        alert('You should only play this game is Landscape left');
+                        isPaused = true;
                         break;
                 }
             }

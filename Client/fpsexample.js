@@ -22,6 +22,8 @@ var worldManager = new WorldManager();
 var networkManager;
 var raycaster;
 
+var isPaused = false;
+
 var geometry = new THREE.SphereGeometry( 2, 8,6 );
 var ballMaterial = new THREE.MeshPhongMaterial({
 	wireframe: true,
@@ -488,8 +490,11 @@ var healthbar = document.getElementById('progress-bar');
     }
 
     function draw() {
-        update();        
-        renderer.render(scene, camera);
+        //if (!isPaused)
+        {
+            update();
+            renderer.render(scene, camera);
+        }
         requestAnimationFrame(draw);
     }
     
