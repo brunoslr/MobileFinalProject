@@ -27,7 +27,13 @@
 		</div>
         <!--Not good at CSS. Cant figure out how to overlay the cross hair onto the canvas. -GOSAR--> 
         <div  id ="crosshair2" ><img src="Textures/crosshair.png" height = "50px" width = "50px"/></div>
-        
+        <audio src="Assets/shoot_sound.wav" id="shootS" />
+        <script>
+            var shootSound = new Audio('Assets/shoot_sound.wav');
+            function loadSound() {
+                shootSound.play();
+            }
+        </script>
 		<script src="fpsexample.js"></script>
         <script>
             var delta = 1 / 60;

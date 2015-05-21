@@ -147,10 +147,10 @@ this.onload = function () {
         worldManager.initFloor(scene);
 
         // objects
-        //worldManager.addBoxes(scene, objects);
+        worldManager.addBoxes(scene, objects);
 
 		//enemies
-        //enemyManager.initEnemies(scene, enemies, loader);
+        enemyManager.initEnemies(scene, enemies, loader);
 
 		var geometry = new THREE.BoxGeometry( 10, 20, 10 );
 		for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
@@ -201,31 +201,31 @@ this.onload = function () {
 		direction = new THREE.Vector3(0, 0, 0);
 
 
-       // var urlPrefix = "Textures/Skybox/";
-       // var urls = [urlPrefix + 'xn.png', urlPrefix + 'xp.png',
-           // urlPrefix + 'yp.png', urlPrefix + 'yn.png',
-           // urlPrefix + 'zp.png', urlPrefix + 'zn.png'];
+       var urlPrefix = "Textures/Skybox/";
+       var urls = [urlPrefix + 'xn.png', urlPrefix + 'xp.png',
+           urlPrefix + 'yp.png', urlPrefix + 'yn.png',
+           urlPrefix + 'zp.png', urlPrefix + 'zn.png'];
 
-       // //var urlPrefix = "Assets/Skybox/";
-       // //var urls = [urlPrefix + 'negx.PNG', urlPrefix + 'posx.PNG',
-       // //    urlPrefix + 'posy.PNG', urlPrefix + 'negy.PNG',
-       // //    urlPrefix + 'posz.PNG', urlPrefix + 'negz.PNG'];
-       // var cubemap = THREE.ImageUtils.loadTextureCube(urls); // load textures
-       // cubemap.format = THREE.RGBFormat;
-       // var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
-       // shader.uniforms['tCube'].value = cubemap; // apply textures to shader
-       // var skyBoxMaterial = new THREE.ShaderMaterial({
-           // fragmentShader: shader.fragmentShader,
-           // vertexShader: shader.vertexShader,
-           // uniforms: shader.uniforms,
-           // depthWrite: false,
-           // side: THREE.BackSide
-       // });
-       // var skybox = new THREE.Mesh(
-             // new THREE.BoxGeometry(10000, 10000, 10000),
-             // skyBoxMaterial
-           // );
-       // scene.add(skybox);
+       //var urlPrefix = "Assets/Skybox/";
+       //var urls = [urlPrefix + 'negx.PNG', urlPrefix + 'posx.PNG',
+       //    urlPrefix + 'posy.PNG', urlPrefix + 'negy.PNG',
+       //    urlPrefix + 'posz.PNG', urlPrefix + 'negz.PNG'];
+       var cubemap = THREE.ImageUtils.loadTextureCube(urls); // load textures
+       cubemap.format = THREE.RGBFormat;
+       var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
+       shader.uniforms['tCube'].value = cubemap; // apply textures to shader
+       var skyBoxMaterial = new THREE.ShaderMaterial({
+           fragmentShader: shader.fragmentShader,
+           vertexShader: shader.vertexShader,
+           uniforms: shader.uniforms,
+           depthWrite: false,
+           side: THREE.BackSide
+       });
+       var skybox = new THREE.Mesh(
+             new THREE.BoxGeometry(10000, 10000, 10000),
+             skyBoxMaterial
+           );
+       scene.add(skybox);
        // skybox end
     }
 
@@ -540,13 +540,15 @@ this.onload = function () {
     }
 
     window.addEventListener("ontouchend", function (e) {
+        loadSound();
         var shootDirection = new THREE.Vector3();
         getShootDir(shootDirection);
             networkManager.spawnBullet(player.position, shootDirection);
         networkManager.sendBullet(player.position, shootDirection);
     });
 	window.addEventListener("click", function (e) {
-        {
+	    {
+	        loadSound();
 			var shootDirection = new THREE.Vector3();
 			getShootDir(shootDirection);
             networkManager.spawnBullet(player.position, shootDirection);
