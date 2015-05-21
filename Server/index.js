@@ -6,9 +6,9 @@ var worldData= "world data\n";
 var bulletCounter= 0;
 var hitBulletArray= new Array();
 var posX, posY, posZ;
-for(var i=0; i<50; i++){
+for(var i=0; i<10; i++){
 	posX = Math.floor(Math.random() * 20 - 10) * 20;
-	posY = Math.floor(Math.random() * 20) * 20 + 10;
+	posY = 10;
 	posZ = Math.floor(Math.random() * 20 - 10) * 20;
 	worldData = worldData + posX + "\n" + posY + "\n" + posZ + "\n";
 }

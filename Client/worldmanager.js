@@ -64,7 +64,7 @@ WorldManager.prototype.addBoxes= function(scene, objects)
 
 	}
 
-	for ( var i = 0; i < 100; i ++ ) {
+	for ( var i = 0; i < 5; i ++ ) {
 
 		var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } );
 

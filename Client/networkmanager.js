@@ -172,20 +172,16 @@ function NetworkManager(){
 	};
 	
 	this.resolveBulletCollision= function (hitPlayerID, bulletID){
-		if(this.playerID != bulletID){
-			console.log(this.playerID);
-			reduceHealth(5);
-		}
-		for(var i = 0; i < this.ballsArray.length; i++)
-		{
-			if(this.ballsArray[i].bulletID==bulletID){
-				scene.removeObject(this.ballsArray[i].obj);
-				this.ballsArray.splice(i,1);
+		if(this.playerID == hitPlayerID){
+			for(var i = 0; i < this.ballsArray.length; i++)
+			{
+				if(this.ballsArray[i].bulletID==bulletID){
+					scene.removeObject(this.ballsArray[i].obj);
+					this.ballsArray.splice(i,1);
+				}
 			}
 		}
 	};
-	
-	
 	
 	this.addBoxes= function(worldData){
 		var geometry = new THREE.BoxGeometry(20, 20, 20);
@@ -253,8 +249,11 @@ function NetworkManager(){
 				{
 					var currentPlayer= this.otherPlayerData[j];
 					if (currentBall.position.distanceTo(currentPlayer.obj.position) < 10) {
-						if(currentPlayer.ID!=currentBall.bulletPlayerID)
-							this.sendHit(currentPlayer.ID, currentBall.bulletPlayerID);
+						if(currentPlayer.ID==currentBall.bulletPlayerID)
+						{
+							this.sendHit(this.otherPlayerData[j].ID, currentBall.bulletPlayerID);
+							reduceHealth(1);
+						}
 					}
 				}
 				
@@ -265,7 +264,6 @@ function NetworkManager(){
 	function reduceHealth( damage)
 	{
 		var healthbar = document.getElementById('progress-bar');
-		console.log("here");
 		healthbar.value = healthbar.value - damage;
 	}
 	
