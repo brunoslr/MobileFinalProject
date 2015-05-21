@@ -21,18 +21,26 @@
 			</div>
 		</div>-->
 		<div id="health">         
-			<div id="percent">Health: <span id="p"></span></div>
+			<div id="percent" style="color:white">Health: <span id="p"></span></div>
 			<progress id="progress-bar" value="100" max="100"></progress>
             <!--<label id="console2">blah</label>-->
 		</div>
         <!--Not good at CSS. Cant figure out how to overlay the cross hair onto the canvas. -GOSAR--> 
         <div  id ="crosshair2" ><img src="Textures/crosshair.png" height = "50px" width = "50px"/></div>
-        <audio src="Assets/shoot_sound.wav" id="shootS" />
         <script>
             var shootSound = new Audio('Assets/shoot_sound.wav');
+            var bgMusic = new Audio('Assets/bg.wav');
             function loadSound() {
+                shootSound.volume = 1;
                 shootSound.play();
             }
+
+            function loadBG() {
+                bgMusic.volume = 0.2;
+                bgMusic.loop = true;
+                bgMusic.play();                
+            }
+            loadBG();
         </script>
 		<script src="fpsexample.js"></script>
         <script>
