@@ -27,6 +27,24 @@
 		</div>
         <!--Not good at CSS. Cant figure out how to overlay the cross hair onto the canvas. -GOSAR--> 
         <div  id ="crosshair2" ><img src="Textures/crosshair.png" height = "50px" width = "50px"/></div>
+        <!--Inline Shaders-->
+        <script id="vertexShader" type="x-shader/x-vertex">
+            varying vec3 vNormal;
+            void main()
+            {
+            vNormal = normalize( normalMatrix * normal );
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            }
+        </script>
+        <script id="fragmentShader" type="x-shader/x-pixel">
+            varying vec3 vNormal;
+            void main()
+            {
+            float intensity = pow( 0.27 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), 4.1 );
+            gl_FragColor = vec4( 189.0 / 255.0, 190.0 / 255.0, 192.0 / 255.0, 1.0 ) * intensity;
+            }
+        </script>
+
         <script>
             var shootSound = new Audio('Assets/shoot_sound.wav');
             var bgMusic = new Audio('Assets/bg.wav');
@@ -41,6 +59,12 @@
                 bgMusic.play();                
             }
             loadBG();
+
+            function loadSun() {
+              
+            }
+
+            loadSun();
         </script>
 		<script src="fpsexample.js"></script>
         <script>

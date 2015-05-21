@@ -226,7 +226,26 @@ this.onload = function () {
              skyBoxMaterial
            );
        scene.add(skybox);
-       // skybox end
+        // skybox end
+
+
+
+       var customMaterial = new THREE.ShaderMaterial(
+                                 {
+                                     uniforms: {},
+                                     vertexShader: document.getElementById('vertexShader').textContent,
+                                     fragmentShader: document.getElementById('fragmentShader').textContent,
+                                     side: THREE.BackSide,
+                                     blending: THREE.AdditiveBlending,
+                                     transparent: true
+                                 });
+       var ballGeometry = new THREE.SphereGeometry(5000, 50, 50);
+       var ball = new THREE.Mesh(ballGeometry, customMaterial);
+      
+       var ptLight = new THREE.PointLight(0xafafaf, 2, 10000);
+       ball.position.set(10000, 0, 0);
+
+       scene.add(ball);
     }
 
 
