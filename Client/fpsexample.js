@@ -24,9 +24,9 @@ var raycaster;
 
 var isPaused = false;
 
-var geometry = new THREE.SphereGeometry( 0.5, 8,6 );
+var geometry = new THREE.SphereGeometry( 0.15, 50, 50 );
 var ballMaterial = new THREE.MeshPhongMaterial({
-	wireframe: true,
+	wireframe: false,
 	color: 0xff0000
 });
 
